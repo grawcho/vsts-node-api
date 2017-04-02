@@ -11,14 +11,14 @@
 // Licensed under the MIT license.  See LICENSE file in the project root for full license information.
 
 import stream = require("stream");
-import Q = require('q');
+import * as restm from 'typed-rest-client/RestClient';
 import VsoBaseInterfaces = require('./interfaces/common/VsoBaseInterfaces');
 import FileContainerApiBase = require("./FileContainerApiBase");
 import FileContainerInterfaces = require("./interfaces/FileContainerInterfaces");
 import vsom = require('./VsoClient');
 
 export interface IFileContainerApi extends FileContainerApiBase.IFileContainerApiBase {
-    createItem(contentStream: NodeJS.ReadableStream, uncompressedLength: number, containerId: number, itemPath: string, scope: string, options: any): Q.Promise<FileContainerInterfaces.FileContainerItem>;
+    createItem(contentStream: NodeJS.ReadableStream, uncompressedLength: number, containerId: number, itemPath: string, scope: string, options: any): Promise<FileContainerInterfaces.FileContainerItem>;
 }
 
 export class FileContainerApi extends FileContainerApiBase.FileContainerApiBase implements IFileContainerApi {
@@ -26,20 +26,19 @@ export class FileContainerApi extends FileContainerApiBase.FileContainerApiBase 
         super(baseUrl, handlers);
     }
     
-    public createItem(contentStream: NodeJS.ReadableStream, uncompressedLength: number, containerId: number, itemPath: string, scope: string, options: any): Q.Promise<FileContainerInterfaces.FileContainerItem> {
-        let deferred = Q.defer<FileContainerInterfaces.FileContainerItem>();
-
-        let chunkStream = new ChunkStream(this, uncompressedLength, containerId, itemPath, scope, options);
-        
-        chunkStream.on('finish', () => {
-            deferred.resolve(chunkStream.getItem());
+    public createItem(contentStream: NodeJS.ReadableStream, uncompressedLength: number, containerId: number, itemPath: string, scope: string, options: any): Promise<FileContainerInterfaces.FileContainerItem> {
+        return new Promise<FileContainerInterfaces.FileContainerItem>((resolve, reject) => {
+            let chunkStream = new ChunkStream(this, uncompressedLength, containerId, itemPath, scope, options);
+            
+            chunkStream.on('finish', () => {
+                resolve(chunkStream.getItem());
+            });
+            
+            contentStream.pipe(chunkStream);
         });
-        
-        contentStream.pipe(chunkStream);
-        
-        return <Q.Promise<FileContainerInterfaces.FileContainerItem>>deferred.promise;
     }
     
+    // used by ChunkStream
     public _createItem(
         customHeaders: VsoBaseInterfaces.IHeaders,
         contentStream: NodeJS.ReadableStream,
@@ -59,19 +58,30 @@ export class FileContainerApi extends FileContainerApiBase.FileContainerApiBase 
         };
         
         customHeaders = customHeaders || {};
-        customHeaders["Content-Type"] = "application/octet-stream";
+        customHeaders["Content-Type"] = "";
+        
 
         this.vsoClient.getVersioningData("2.2-preview.3", "Container", "e4f5c81e-e250-447b-9fef-bd48471bea5e", routeValues, queryValues)
-        .then((versioningData: vsom.ClientVersioningData) => {
-            var url: string = versioningData.requestUrl;
-            var apiVersion: string = versioningData.apiVersion;
-            var serializationData = {  responseTypeMetadata: FileContainerInterfaces.TypeInfo.FileContainerItem, responseIsCollection: false };
-            
-            this.restClient.uploadStream('PUT', url, apiVersion, contentStream, customHeaders, serializationData, onResult);
-        })
-        .fail((error) => {
-            onResult(error, error.statusCode, null);
-        });
+            .then((versioningData: vsom.ClientVersioningData) => {
+                var url: string = versioningData.requestUrl;
+                var serializationData = {  responseTypeMetadata: FileContainerInterfaces.TypeInfo.FileContainerItem, responseIsCollection: false };
+
+                let options: restm.IRequestOptions = this.createRequestOptions('application/octet-stream',
+                                                                                versioningData.apiVersion);
+                options.additionalHeaders = customHeaders;
+                this.rest.uploadStream<FileContainerInterfaces.FileContainerItem>('PUT', url, contentStream, options)
+                .then((res: restm.IRestResponse<FileContainerInterfaces.FileContainerItem>) => {
+                    let ret = this.formatResponse(res.result, 
+                                                  FileContainerInterfaces.TypeInfo.FileContainerItem, 
+                                                  false);
+                    onResult(null, res.statusCode, ret);
+                })
+                .catch((err) => {
+                    onResult(err, err.statusCode, null);    
+                });
+            }, (error) => {
+                onResult(error, error.statusCode, null);
+            });
     }
 }
 
