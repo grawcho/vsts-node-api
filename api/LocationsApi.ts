@@ -1,8 +1,8 @@
-/*
+﻿/*
  * ---------------------------------------------------------
  * Copyright(C) Microsoft Corporation. All rights reserved.
  * ---------------------------------------------------------
- * 
+ *
  * ---------------------------------------------------------
  * Generated file, DO NOT EDIT
  * ---------------------------------------------------------
@@ -11,27 +11,27 @@
 // Licensed under the MIT license.  See LICENSE file in the project root for full license information.
 
 import * as restm from 'typed-rest-client/RestClient';
-import * as httpm from 'typed-rest-client/HttpClient';
 import vsom = require('./VsoClient');
 import basem = require('./ClientApiBases');
-import serm = require('./Serialization');
 import VsoBaseInterfaces = require('./interfaces/common/VsoBaseInterfaces');
 import LocationsInterfaces = require("./interfaces/LocationsInterfaces");
 import VSSInterfaces = require("./interfaces/common/VSSInterfaces");
 
 export interface ILocationsApi extends basem.ClientApiBase {
     getConnectionData(connectOptions?: VSSInterfaces.ConnectOptions, lastChangeId?: number, lastChangeId64?: number): Promise<LocationsInterfaces.ConnectionData>;
-    getResourceArea(areaId: string): Promise<LocationsInterfaces.ResourceAreaInfo>;
-    getResourceAreas(): Promise<LocationsInterfaces.ResourceAreaInfo[]>;
+    getResourceArea(areaId: string, enterpriseName?: string, organizationName?: string): Promise<LocationsInterfaces.ResourceAreaInfo>;
+    getResourceAreaByHost(areaId: string, hostId: string): Promise<LocationsInterfaces.ResourceAreaInfo>;
+    getResourceAreas(enterpriseName?: string, organizationName?: string): Promise<LocationsInterfaces.ResourceAreaInfo[]>;
+    getResourceAreasByHost(hostId: string): Promise<LocationsInterfaces.ResourceAreaInfo[]>;
     deleteServiceDefinition(serviceType: string, identifier: string): Promise<void>;
-    getServiceDefinition(serviceType: string, identifier: string, allowFaultIn?: boolean): Promise<LocationsInterfaces.ServiceDefinition>;
+    getServiceDefinition(serviceType: string, identifier: string, allowFaultIn?: boolean, previewFaultIn?: boolean): Promise<LocationsInterfaces.ServiceDefinition>;
     getServiceDefinitions(serviceType?: string): Promise<LocationsInterfaces.ServiceDefinition[]>;
     updateServiceDefinitions(serviceDefinitions: VSSInterfaces.VssJsonCollectionWrapperV<LocationsInterfaces.ServiceDefinition[]>): Promise<void>;
 }
 
 export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
-    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[]) {
-        super(baseUrl, handlers, 'node-Locations-api');
+    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions) {
+        super(baseUrl, handlers, 'node-Locations-api', options);
     }
 
     /**
@@ -59,13 +59,13 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Location",
                     "00d9565f-ed9c-4a06-9a50-00e7896ccab4",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -87,9 +87,13 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
 
     /**
      * @param {string} areaId
+     * @param {string} enterpriseName
+     * @param {string} organizationName
      */
     public async getResourceArea(
-        areaId: string
+        areaId: string,
+        enterpriseName?: string,
+        organizationName?: string
         ): Promise<LocationsInterfaces.ResourceAreaInfo> {
 
         return new Promise<LocationsInterfaces.ResourceAreaInfo>(async (resolve, reject) => {
@@ -97,14 +101,20 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
                 areaId: areaId
             };
 
+            let queryValues: any = {
+                enterpriseName: enterpriseName,
+                organizationName: organizationName,
+            };
+            
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Location",
                     "e81700f7-3be2-46de-8624-2eb35882fcaa",
-                    routeValues);
+                    routeValues,
+                    queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -125,22 +135,127 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
     }
 
     /**
+     * @param {string} areaId
+     * @param {string} hostId
+     */
+    public async getResourceAreaByHost(
+        areaId: string,
+        hostId: string
+        ): Promise<LocationsInterfaces.ResourceAreaInfo> {
+        if (hostId == null) {
+            throw new TypeError('hostId can not be null or undefined');
+        }
+
+        return new Promise<LocationsInterfaces.ResourceAreaInfo>(async (resolve, reject) => {
+            let routeValues: any = {
+                areaId: areaId
+            };
+
+            let queryValues: any = {
+                hostId: hostId,
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "Location",
+                    "e81700f7-3be2-46de-8624-2eb35882fcaa",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<LocationsInterfaces.ResourceAreaInfo>;
+                res = await this.rest.get<LocationsInterfaces.ResourceAreaInfo>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {string} enterpriseName
+     * @param {string} organizationName
      */
     public async getResourceAreas(
+        enterpriseName?: string,
+        organizationName?: string
         ): Promise<LocationsInterfaces.ResourceAreaInfo[]> {
 
         return new Promise<LocationsInterfaces.ResourceAreaInfo[]>(async (resolve, reject) => {
             let routeValues: any = {
             };
 
+            let queryValues: any = {
+                enterpriseName: enterpriseName,
+                organizationName: organizationName,
+            };
+            
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Location",
                     "e81700f7-3be2-46de-8624-2eb35882fcaa",
-                    routeValues);
+                    routeValues,
+                    queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<LocationsInterfaces.ResourceAreaInfo[]>;
+                res = await this.rest.get<LocationsInterfaces.ResourceAreaInfo[]>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {string} hostId
+     */
+    public async getResourceAreasByHost(
+        hostId: string
+        ): Promise<LocationsInterfaces.ResourceAreaInfo[]> {
+        if (hostId == null) {
+            throw new TypeError('hostId can not be null or undefined');
+        }
+
+        return new Promise<LocationsInterfaces.ResourceAreaInfo[]>(async (resolve, reject) => {
+            let routeValues: any = {
+            };
+
+            let queryValues: any = {
+                hostId: hostId,
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "Location",
+                    "e81700f7-3be2-46de-8624-2eb35882fcaa",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -177,12 +292,12 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Location",
                     "d810a47d-f4f4-4a62-a03f-fa1860585c4c",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -203,14 +318,18 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
     }
 
     /**
+     * Finds a given service definition.
+     * 
      * @param {string} serviceType
      * @param {string} identifier
-     * @param {boolean} allowFaultIn
+     * @param {boolean} allowFaultIn - If true, we will attempt to fault in a host instance mapping if in SPS.
+     * @param {boolean} previewFaultIn - If true, we will calculate and return a host instance mapping, but not persist it.
      */
     public async getServiceDefinition(
         serviceType: string,
         identifier: string,
-        allowFaultIn?: boolean
+        allowFaultIn?: boolean,
+        previewFaultIn?: boolean
         ): Promise<LocationsInterfaces.ServiceDefinition> {
 
         return new Promise<LocationsInterfaces.ServiceDefinition>(async (resolve, reject) => {
@@ -221,17 +340,18 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
 
             let queryValues: any = {
                 allowFaultIn: allowFaultIn,
+                previewFaultIn: previewFaultIn,
             };
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Location",
                     "d810a47d-f4f4-4a62-a03f-fa1860585c4c",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -265,12 +385,12 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Location",
                     "d810a47d-f4f4-4a62-a03f-fa1860585c4c",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -303,12 +423,12 @@ export class LocationsApi extends basem.ClientApiBase implements ILocationsApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Location",
                     "d810a47d-f4f4-4a62-a03f-fa1860585c4c",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 

@@ -1,8 +1,8 @@
-/*
+﻿/*
  * ---------------------------------------------------------
  * Copyright(C) Microsoft Corporation. All rights reserved.
  * ---------------------------------------------------------
- * 
+ *
  * ---------------------------------------------------------
  * Generated file, DO NOT EDIT
  * ---------------------------------------------------------
@@ -11,19 +11,20 @@
 // Licensed under the MIT license.  See LICENSE file in the project root for full license information.
 
 import * as restm from 'typed-rest-client/RestClient';
-import * as httpm from 'typed-rest-client/HttpClient';
 import vsom = require('./VsoClient');
 import basem = require('./ClientApiBases');
-import serm = require('./Serialization');
 import VsoBaseInterfaces = require('./interfaces/common/VsoBaseInterfaces');
 import TfsCoreInterfaces = require("./interfaces/CoreInterfaces");
 import WorkInterfaces = require("./interfaces/WorkInterfaces");
 
 export interface IWorkApi extends basem.ClientApiBase {
     getBacklogConfigurations(teamContext: TfsCoreInterfaces.TeamContext): Promise<WorkInterfaces.BacklogConfiguration>;
+    getBacklogLevelWorkItems(teamContext: TfsCoreInterfaces.TeamContext, backlogId: string): Promise<WorkInterfaces.BacklogLevelWorkItems>;
+    getBacklog(teamContext: TfsCoreInterfaces.TeamContext, id: string): Promise<WorkInterfaces.BacklogLevelConfiguration>;
+    getBacklogs(teamContext: TfsCoreInterfaces.TeamContext): Promise<WorkInterfaces.BacklogLevelConfiguration[]>;
+    getBoardBadge(teamContext: TfsCoreInterfaces.TeamContext, id: string, columnOptions?: WorkInterfaces.BoardBadgeColumnOptions, columns?: string[]): Promise<WorkInterfaces.BoardBadge>;
+    getBoardBadgeData(teamContext: TfsCoreInterfaces.TeamContext, id: string, columnOptions?: WorkInterfaces.BoardBadgeColumnOptions, columns?: string[]): Promise<string>;
     getColumnSuggestedValues(project?: string): Promise<WorkInterfaces.BoardSuggestedValue[]>;
-    getBoardFilterSettings(teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardFilterSettings>;
-    updateBoardFilterSettings(filterSettings: WorkInterfaces.BoardFilterSettings, teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardFilterSettings>;
     getBoardMappingParentItems(teamContext: TfsCoreInterfaces.TeamContext, childBacklogContextCategoryRefName: string, workitemIds: number[]): Promise<WorkInterfaces.ParentChildWIMap[]>;
     getRowSuggestedValues(project?: string): Promise<WorkInterfaces.BoardSuggestedValue[]>;
     getBoard(teamContext: TfsCoreInterfaces.TeamContext, id: string): Promise<WorkInterfaces.Board>;
@@ -31,14 +32,16 @@ export interface IWorkApi extends basem.ClientApiBase {
     setBoardOptions(options: { [key: string] : string; }, teamContext: TfsCoreInterfaces.TeamContext, id: string): Promise<{ [key: string] : string; }>;
     getBoardUserSettings(teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardUserSettings>;
     updateBoardUserSettings(boardUserSettings: { [key: string] : string; }, teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardUserSettings>;
-    getCapacities(teamContext: TfsCoreInterfaces.TeamContext, iterationId: string): Promise<WorkInterfaces.TeamMemberCapacity[]>;
-    getCapacity(teamContext: TfsCoreInterfaces.TeamContext, iterationId: string, teamMemberId: string): Promise<WorkInterfaces.TeamMemberCapacity>;
-    replaceCapacities(capacities: WorkInterfaces.TeamMemberCapacity[], teamContext: TfsCoreInterfaces.TeamContext, iterationId: string): Promise<WorkInterfaces.TeamMemberCapacity[]>;
-    updateCapacity(patch: WorkInterfaces.CapacityPatch, teamContext: TfsCoreInterfaces.TeamContext, iterationId: string, teamMemberId: string): Promise<WorkInterfaces.TeamMemberCapacity>;
+    getCapacitiesWithIdentityRef(teamContext: TfsCoreInterfaces.TeamContext, iterationId: string): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef[]>;
+    getCapacityWithIdentityRef(teamContext: TfsCoreInterfaces.TeamContext, iterationId: string, teamMemberId: string): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef>;
+    replaceCapacitiesWithIdentityRef(capacities: WorkInterfaces.TeamMemberCapacityIdentityRef[], teamContext: TfsCoreInterfaces.TeamContext, iterationId: string): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef[]>;
+    updateCapacityWithIdentityRef(patch: WorkInterfaces.CapacityPatch, teamContext: TfsCoreInterfaces.TeamContext, iterationId: string, teamMemberId: string): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef>;
     getBoardCardRuleSettings(teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardCardRuleSettings>;
     updateBoardCardRuleSettings(boardCardRuleSettings: WorkInterfaces.BoardCardRuleSettings, teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardCardRuleSettings>;
+    updateTaskboardCardRuleSettings(boardCardRuleSettings: WorkInterfaces.BoardCardRuleSettings, teamContext: TfsCoreInterfaces.TeamContext): Promise<void>;
     getBoardCardSettings(teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardCardSettings>;
     updateBoardCardSettings(boardCardSettingsToSave: WorkInterfaces.BoardCardSettings, teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardCardSettings>;
+    updateTaskboardCardSettings(boardCardSettingsToSave: WorkInterfaces.BoardCardSettings, teamContext: TfsCoreInterfaces.TeamContext): Promise<void>;
     getBoardChart(teamContext: TfsCoreInterfaces.TeamContext, board: string, name: string): Promise<WorkInterfaces.BoardChart>;
     getBoardCharts(teamContext: TfsCoreInterfaces.TeamContext, board: string): Promise<WorkInterfaces.BoardChartReference[]>;
     updateBoardChart(chart: WorkInterfaces.BoardChart, teamContext: TfsCoreInterfaces.TeamContext, board: string, name: string): Promise<WorkInterfaces.BoardChart>;
@@ -63,14 +66,19 @@ export interface IWorkApi extends basem.ClientApiBase {
     updateTeamFieldValues(patch: WorkInterfaces.TeamFieldValuesPatch, teamContext: TfsCoreInterfaces.TeamContext): Promise<WorkInterfaces.TeamFieldValues>;
     getTeamSettings(teamContext: TfsCoreInterfaces.TeamContext): Promise<WorkInterfaces.TeamSetting>;
     updateTeamSettings(teamSettingsPatch: WorkInterfaces.TeamSettingsPatch, teamContext: TfsCoreInterfaces.TeamContext): Promise<WorkInterfaces.TeamSetting>;
+    getIterationWorkItems(teamContext: TfsCoreInterfaces.TeamContext, iterationId: string): Promise<WorkInterfaces.IterationWorkItems>;
 }
 
 export class WorkApi extends basem.ClientApiBase implements IWorkApi {
-    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[]) {
-        super(baseUrl, handlers, 'node-Work-api');
+    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions) {
+        super(baseUrl, handlers, 'node-Work-api', options);
     }
 
+    public static readonly RESOURCE_AREA_ID = "1d4f49f9-02b9-4e26-b826-2cdb6195f2a9";
+
     /**
+     * Gets backlog configuration for a team
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async getBacklogConfigurations(
@@ -78,8 +86,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BacklogConfiguration> {
 
         return new Promise<WorkInterfaces.BacklogConfiguration>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -88,12 +100,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "7799f497-3cb5-4f16-ad4f-5cd06012db64",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -114,6 +126,285 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get a list of work items within a backlog level
+     * 
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     * @param {string} backlogId
+     */
+    public async getBacklogLevelWorkItems(
+        teamContext: TfsCoreInterfaces.TeamContext,
+        backlogId: string
+        ): Promise<WorkInterfaces.BacklogLevelWorkItems> {
+
+        return new Promise<WorkInterfaces.BacklogLevelWorkItems>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team,
+                backlogId: backlogId
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "work",
+                    "7c468d96-ab1d-4294-a360-92f07e9ccd98",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<WorkInterfaces.BacklogLevelWorkItems>;
+                res = await this.rest.get<WorkInterfaces.BacklogLevelWorkItems>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Get a backlog level
+     * 
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     * @param {string} id - The id of the backlog level
+     */
+    public async getBacklog(
+        teamContext: TfsCoreInterfaces.TeamContext,
+        id: string
+        ): Promise<WorkInterfaces.BacklogLevelConfiguration> {
+
+        return new Promise<WorkInterfaces.BacklogLevelConfiguration>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team,
+                id: id
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "work",
+                    "a93726f9-7867-4e38-b4f2-0bfafc2f6a94",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<WorkInterfaces.BacklogLevelConfiguration>;
+                res = await this.rest.get<WorkInterfaces.BacklogLevelConfiguration>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              WorkInterfaces.TypeInfo.BacklogLevelConfiguration,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * List all backlog levels
+     * 
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     */
+    public async getBacklogs(
+        teamContext: TfsCoreInterfaces.TeamContext
+        ): Promise<WorkInterfaces.BacklogLevelConfiguration[]> {
+
+        return new Promise<WorkInterfaces.BacklogLevelConfiguration[]>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "work",
+                    "a93726f9-7867-4e38-b4f2-0bfafc2f6a94",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<WorkInterfaces.BacklogLevelConfiguration[]>;
+                res = await this.rest.get<WorkInterfaces.BacklogLevelConfiguration[]>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              WorkInterfaces.TypeInfo.BacklogLevelConfiguration,
+                                              true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Gets a badge that displays the status of columns on the board.
+     * 
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     * @param {string} id - The id of the board.
+     * @param {WorkInterfaces.BoardBadgeColumnOptions} columnOptions - Determines what columns to show.
+     * @param {string[]} columns - If columnOptions is set to custom, specify the list of column names.
+     */
+    public async getBoardBadge(
+        teamContext: TfsCoreInterfaces.TeamContext,
+        id: string,
+        columnOptions?: WorkInterfaces.BoardBadgeColumnOptions,
+        columns?: string[]
+        ): Promise<WorkInterfaces.BoardBadge> {
+
+        return new Promise<WorkInterfaces.BoardBadge>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team,
+                id: id
+            };
+
+            let queryValues: any = {
+                columnOptions: columnOptions,
+                columns: columns && columns.join(","),
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "work",
+                    "0120b002-ab6c-4ca0-98cf-a8d7492f865c",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<WorkInterfaces.BoardBadge>;
+                res = await this.rest.get<WorkInterfaces.BoardBadge>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Gets a badge that displays the status of columns on the board.
+     * 
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     * @param {string} id - The id of the board.
+     * @param {WorkInterfaces.BoardBadgeColumnOptions} columnOptions - Determines what columns to show.
+     * @param {string[]} columns - If columnOptions is set to custom, specify the list of column names.
+     */
+    public async getBoardBadgeData(
+        teamContext: TfsCoreInterfaces.TeamContext,
+        id: string,
+        columnOptions?: WorkInterfaces.BoardBadgeColumnOptions,
+        columns?: string[]
+        ): Promise<string> {
+
+        return new Promise<string>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team,
+                id: id
+            };
+
+            let queryValues: any = {
+                columnOptions: columnOptions,
+                columns: columns && columns.join(","),
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "work",
+                    "0120b002-ab6c-4ca0-98cf-a8d7492f865c",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<string>;
+                res = await this.rest.get<string>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Get available board columns in a project
+     * 
      * @param {string} project - Project ID or project name
      */
     public async getColumnSuggestedValues(
@@ -127,12 +418,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "eb7ec5a3-1ba3-4fd1-b834-49a5a387e57d",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -142,104 +433,6 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
                 let ret = this.formatResponse(res.result,
                                               null,
                                               true);
-
-                resolve(ret);
-                
-            }
-            catch (err) {
-                reject(err);
-            }
-        });
-    }
-
-    /**
-     * Returns the board filter settings for the given board id or board by name
-     * 
-     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} board
-     */
-    public async getBoardFilterSettings(
-        teamContext: TfsCoreInterfaces.TeamContext,
-        board: string
-        ): Promise<WorkInterfaces.BoardFilterSettings> {
-
-        return new Promise<WorkInterfaces.BoardFilterSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
-
-            let routeValues: any = {
-                project: project,
-                team: team,
-                board: board
-            };
-
-            try {
-                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
-                    "work",
-                    "cfe2d81b-12ba-4083-9e5a-859818c763e4",
-                    routeValues);
-
-                let url: string = verData.requestUrl;
-                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
-                                                                                verData.apiVersion);
-
-                let res: restm.IRestResponse<WorkInterfaces.BoardFilterSettings>;
-                res = await this.rest.get<WorkInterfaces.BoardFilterSettings>(url, options);
-
-                let ret = this.formatResponse(res.result,
-                                              null,
-                                              false);
-
-                resolve(ret);
-                
-            }
-            catch (err) {
-                reject(err);
-            }
-        });
-    }
-
-    /**
-     * Update board filter settings for the board id or board by name
-     * 
-     * @param {WorkInterfaces.BoardFilterSettings} filterSettings
-     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} board
-     */
-    public async updateBoardFilterSettings(
-        filterSettings: WorkInterfaces.BoardFilterSettings,
-        teamContext: TfsCoreInterfaces.TeamContext,
-        board: string
-        ): Promise<WorkInterfaces.BoardFilterSettings> {
-
-        return new Promise<WorkInterfaces.BoardFilterSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
-
-            let routeValues: any = {
-                project: project,
-                team: team,
-                board: board
-            };
-
-            try {
-                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
-                    "work",
-                    "cfe2d81b-12ba-4083-9e5a-859818c763e4",
-                    routeValues);
-
-                let url: string = verData.requestUrl;
-                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
-                                                                                verData.apiVersion);
-
-                let res: restm.IRestResponse<WorkInterfaces.BoardFilterSettings>;
-                res = await this.rest.update<WorkInterfaces.BoardFilterSettings>(url, filterSettings, options);
-
-                let ret = this.formatResponse(res.result,
-                                              null,
-                                              false);
 
                 resolve(ret);
                 
@@ -262,10 +455,20 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         childBacklogContextCategoryRefName: string,
         workitemIds: number[]
         ): Promise<WorkInterfaces.ParentChildWIMap[]> {
+        if (childBacklogContextCategoryRefName == null) {
+            throw new TypeError('childBacklogContextCategoryRefName can not be null or undefined');
+        }
+        if (workitemIds == null) {
+            throw new TypeError('workitemIds can not be null or undefined');
+        }
 
         return new Promise<WorkInterfaces.ParentChildWIMap[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -279,13 +482,13 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "186abea3-5c35-432f-9e28-7a15b4312a0e",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -306,6 +509,8 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get available board rows in a project
+     * 
      * @param {string} project - Project ID or project name
      */
     public async getRowSuggestedValues(
@@ -319,12 +524,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "bb494cc6-a0f5-4c6c-8dca-ea6912e79eb9",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -356,8 +561,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.Board> {
 
         return new Promise<WorkInterfaces.Board>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -367,12 +576,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "23ad19fc-3b8e-4877-8462-b3f92bc06b40",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -393,6 +602,8 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get boards
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async getBoards(
@@ -400,8 +611,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardReference[]> {
 
         return new Promise<WorkInterfaces.BoardReference[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -410,12 +625,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "23ad19fc-3b8e-4877-8462-b3f92bc06b40",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -449,8 +664,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<{ [key: string] : string; }> {
 
         return new Promise<{ [key: string] : string; }>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -460,12 +679,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "23ad19fc-3b8e-4877-8462-b3f92bc06b40",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -486,8 +705,10 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get board user settings for a board id
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} board
+     * @param {string} board - Board ID or Name
      */
     public async getBoardUserSettings(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -495,8 +716,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardUserSettings> {
 
         return new Promise<WorkInterfaces.BoardUserSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -506,12 +731,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "b30d9f58-1891-4b0a-b168-c46408f919b0",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -545,8 +770,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardUserSettings> {
 
         return new Promise<WorkInterfaces.BoardUserSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -556,12 +785,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "b30d9f58-1891-4b0a-b168-c46408f919b0",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -582,17 +811,23 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get a team's capacity
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} iterationId
+     * @param {string} iterationId - ID of the iteration
      */
-    public async getCapacities(
+    public async getCapacitiesWithIdentityRef(
         teamContext: TfsCoreInterfaces.TeamContext,
         iterationId: string
-        ): Promise<WorkInterfaces.TeamMemberCapacity[]> {
+        ): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef[]> {
 
-        return new Promise<WorkInterfaces.TeamMemberCapacity[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+        return new Promise<WorkInterfaces.TeamMemberCapacityIdentityRef[]>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -602,20 +837,20 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "74412d15-8c1a-4352-a48d-ef1ed5587d57",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
-                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacity[]>;
-                res = await this.rest.get<WorkInterfaces.TeamMemberCapacity[]>(url, options);
+                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacityIdentityRef[]>;
+                res = await this.rest.get<WorkInterfaces.TeamMemberCapacityIdentityRef[]>(url, options);
 
                 let ret = this.formatResponse(res.result,
-                                              WorkInterfaces.TypeInfo.TeamMemberCapacity,
+                                              WorkInterfaces.TypeInfo.TeamMemberCapacityIdentityRef,
                                               true);
 
                 resolve(ret);
@@ -628,19 +863,25 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get a team member's capacity
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} iterationId
-     * @param {string} teamMemberId
+     * @param {string} iterationId - ID of the iteration
+     * @param {string} teamMemberId - ID of the team member
      */
-    public async getCapacity(
+    public async getCapacityWithIdentityRef(
         teamContext: TfsCoreInterfaces.TeamContext,
         iterationId: string,
         teamMemberId: string
-        ): Promise<WorkInterfaces.TeamMemberCapacity> {
+        ): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef> {
 
-        return new Promise<WorkInterfaces.TeamMemberCapacity>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+        return new Promise<WorkInterfaces.TeamMemberCapacityIdentityRef>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -651,20 +892,20 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "74412d15-8c1a-4352-a48d-ef1ed5587d57",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
-                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacity>;
-                res = await this.rest.get<WorkInterfaces.TeamMemberCapacity>(url, options);
+                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacityIdentityRef>;
+                res = await this.rest.get<WorkInterfaces.TeamMemberCapacityIdentityRef>(url, options);
 
                 let ret = this.formatResponse(res.result,
-                                              WorkInterfaces.TypeInfo.TeamMemberCapacity,
+                                              WorkInterfaces.TypeInfo.TeamMemberCapacityIdentityRef,
                                               false);
 
                 resolve(ret);
@@ -677,19 +918,25 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
-     * @param {WorkInterfaces.TeamMemberCapacity[]} capacities
+     * Replace a team's capacity
+     * 
+     * @param {WorkInterfaces.TeamMemberCapacityIdentityRef[]} capacities - Team capacity to replace
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} iterationId
+     * @param {string} iterationId - ID of the iteration
      */
-    public async replaceCapacities(
-        capacities: WorkInterfaces.TeamMemberCapacity[],
+    public async replaceCapacitiesWithIdentityRef(
+        capacities: WorkInterfaces.TeamMemberCapacityIdentityRef[],
         teamContext: TfsCoreInterfaces.TeamContext,
         iterationId: string
-        ): Promise<WorkInterfaces.TeamMemberCapacity[]> {
+        ): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef[]> {
 
-        return new Promise<WorkInterfaces.TeamMemberCapacity[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+        return new Promise<WorkInterfaces.TeamMemberCapacityIdentityRef[]>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -699,20 +946,20 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "74412d15-8c1a-4352-a48d-ef1ed5587d57",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
-                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacity[]>;
-                res = await this.rest.replace<WorkInterfaces.TeamMemberCapacity[]>(url, capacities, options);
+                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacityIdentityRef[]>;
+                res = await this.rest.replace<WorkInterfaces.TeamMemberCapacityIdentityRef[]>(url, capacities, options);
 
                 let ret = this.formatResponse(res.result,
-                                              WorkInterfaces.TypeInfo.TeamMemberCapacity,
+                                              WorkInterfaces.TypeInfo.TeamMemberCapacityIdentityRef,
                                               true);
 
                 resolve(ret);
@@ -725,21 +972,27 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
-     * @param {WorkInterfaces.CapacityPatch} patch
+     * Update a team member's capacity
+     * 
+     * @param {WorkInterfaces.CapacityPatch} patch - Updated capacity
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} iterationId
-     * @param {string} teamMemberId
+     * @param {string} iterationId - ID of the iteration
+     * @param {string} teamMemberId - ID of the team member
      */
-    public async updateCapacity(
+    public async updateCapacityWithIdentityRef(
         patch: WorkInterfaces.CapacityPatch,
         teamContext: TfsCoreInterfaces.TeamContext,
         iterationId: string,
         teamMemberId: string
-        ): Promise<WorkInterfaces.TeamMemberCapacity> {
+        ): Promise<WorkInterfaces.TeamMemberCapacityIdentityRef> {
 
-        return new Promise<WorkInterfaces.TeamMemberCapacity>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+        return new Promise<WorkInterfaces.TeamMemberCapacityIdentityRef>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -750,20 +1003,20 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "74412d15-8c1a-4352-a48d-ef1ed5587d57",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
-                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacity>;
-                res = await this.rest.update<WorkInterfaces.TeamMemberCapacity>(url, patch, options);
+                let res: restm.IRestResponse<WorkInterfaces.TeamMemberCapacityIdentityRef>;
+                res = await this.rest.update<WorkInterfaces.TeamMemberCapacityIdentityRef>(url, patch, options);
 
                 let ret = this.formatResponse(res.result,
-                                              WorkInterfaces.TypeInfo.TeamMemberCapacity,
+                                              WorkInterfaces.TypeInfo.TeamMemberCapacityIdentityRef,
                                               false);
 
                 resolve(ret);
@@ -787,8 +1040,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardCardRuleSettings> {
 
         return new Promise<WorkInterfaces.BoardCardRuleSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -798,12 +1055,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "b044a3d9-02ea-49c7-91a1-b730949cc896",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -837,8 +1094,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardCardRuleSettings> {
 
         return new Promise<WorkInterfaces.BoardCardRuleSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -848,17 +1109,68 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "b044a3d9-02ea-49c7-91a1-b730949cc896",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
                 let res: restm.IRestResponse<WorkInterfaces.BoardCardRuleSettings>;
                 res = await this.rest.update<WorkInterfaces.BoardCardRuleSettings>(url, boardCardRuleSettings, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Update taskboard card Rule settings
+     * 
+     * @param {WorkInterfaces.BoardCardRuleSettings} boardCardRuleSettings
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     */
+    public async updateTaskboardCardRuleSettings(
+        boardCardRuleSettings: WorkInterfaces.BoardCardRuleSettings,
+        teamContext: TfsCoreInterfaces.TeamContext
+        ): Promise<void> {
+
+        return new Promise<void>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.2",
+                    "work",
+                    "3f84a8d1-1aab-423e-a94b-6dcbdcca511f",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<void>;
+                res = await this.rest.update<void>(url, boardCardRuleSettings, options);
 
                 let ret = this.formatResponse(res.result,
                                               null,
@@ -885,8 +1197,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardCardSettings> {
 
         return new Promise<WorkInterfaces.BoardCardSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -896,12 +1212,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "07c3b467-bc60-4f05-8e34-599ce288fafc",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -935,8 +1251,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardCardSettings> {
 
         return new Promise<WorkInterfaces.BoardCardSettings>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -946,17 +1266,68 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.2",
                     "work",
                     "07c3b467-bc60-4f05-8e34-599ce288fafc",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
                 let res: restm.IRestResponse<WorkInterfaces.BoardCardSettings>;
                 res = await this.rest.replace<WorkInterfaces.BoardCardSettings>(url, boardCardSettingsToSave, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Update taskboard card settings
+     * 
+     * @param {WorkInterfaces.BoardCardSettings} boardCardSettingsToSave
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     */
+    public async updateTaskboardCardSettings(
+        boardCardSettingsToSave: WorkInterfaces.BoardCardSettings,
+        teamContext: TfsCoreInterfaces.TeamContext
+        ): Promise<void> {
+
+        return new Promise<void>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.2",
+                    "work",
+                    "0d63745f-31f3-4cf3-9056-2a064e567637",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<void>;
+                res = await this.rest.replace<void>(url, boardCardSettingsToSave, options);
 
                 let ret = this.formatResponse(res.result,
                                               null,
@@ -985,8 +1356,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardChart> {
 
         return new Promise<WorkInterfaces.BoardChart>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -997,12 +1372,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "45fe888c-239e-49fd-958c-df1a1ab21d97",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1034,8 +1409,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardChartReference[]> {
 
         return new Promise<WorkInterfaces.BoardChartReference[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1045,12 +1424,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "45fe888c-239e-49fd-958c-df1a1ab21d97",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1086,8 +1465,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardChart> {
 
         return new Promise<WorkInterfaces.BoardChart>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1098,12 +1481,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "45fe888c-239e-49fd-958c-df1a1ab21d97",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1124,8 +1507,10 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get columns on a board
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} board
+     * @param {string} board - Name or ID of the specific board
      */
     public async getBoardColumns(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -1133,8 +1518,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardColumn[]> {
 
         return new Promise<WorkInterfaces.BoardColumn[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1144,12 +1533,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c555d7ff-84e1-47df-9923-a3fe0cd8751b",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1170,9 +1559,11 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
-     * @param {WorkInterfaces.BoardColumn[]} boardColumns
+     * Update columns on a board
+     * 
+     * @param {WorkInterfaces.BoardColumn[]} boardColumns - List of board columns to update
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} board
+     * @param {string} board - Name or ID of the specific board
      */
     public async updateBoardColumns(
         boardColumns: WorkInterfaces.BoardColumn[],
@@ -1181,8 +1572,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardColumn[]> {
 
         return new Promise<WorkInterfaces.BoardColumn[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1192,12 +1587,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c555d7ff-84e1-47df-9923-a3fe0cd8751b",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1248,13 +1643,13 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "bdd0834e-101f-49f0-a6ae-509f384a12b4",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1275,8 +1670,10 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Delete a team's iteration by iterationId
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} id
+     * @param {string} id - ID of the iteration
      */
     public async deleteTeamIteration(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -1284,8 +1681,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<void> {
 
         return new Promise<void>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1295,12 +1696,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c9175577-28a1-4b06-9197-8636af9f64ad",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1321,8 +1722,10 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get team's iteration by iterationId
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} id
+     * @param {string} id - ID of the iteration
      */
     public async getTeamIteration(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -1330,8 +1733,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamSettingsIteration> {
 
         return new Promise<WorkInterfaces.TeamSettingsIteration>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1341,12 +1748,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c9175577-28a1-4b06-9197-8636af9f64ad",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1367,8 +1774,10 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get a team's iterations using timeframe filter
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} timeframe
+     * @param {string} timeframe - A filter for which iterations are returned based on relative time. Only Current is supported currently.
      */
     public async getTeamIterations(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -1376,8 +1785,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamSettingsIteration[]> {
 
         return new Promise<WorkInterfaces.TeamSettingsIteration[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1390,13 +1803,13 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c9175577-28a1-4b06-9197-8636af9f64ad",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1417,7 +1830,9 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
-     * @param {WorkInterfaces.TeamSettingsIteration} iteration
+     * Add an iteration to the team
+     * 
+     * @param {WorkInterfaces.TeamSettingsIteration} iteration - Iteration to add
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async postTeamIteration(
@@ -1426,8 +1841,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamSettingsIteration> {
 
         return new Promise<WorkInterfaces.TeamSettingsIteration>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1436,12 +1855,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c9175577-28a1-4b06-9197-8636af9f64ad",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1479,12 +1898,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "0b42cb47-cd73-4810-ac90-19c9ba147453",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1523,12 +1942,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "0b42cb47-cd73-4810-ac90-19c9ba147453",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1567,12 +1986,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "0b42cb47-cd73-4810-ac90-19c9ba147453",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1593,6 +2012,8 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get the information for all the plans configured for the given team
+     * 
      * @param {string} project - Project ID or project name
      */
     public async getPlans(
@@ -1606,12 +2027,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "0b42cb47-cd73-4810-ac90-19c9ba147453",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1652,12 +2073,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "0b42cb47-cd73-4810-ac90-19c9ba147453",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1678,6 +2099,8 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get process configuration
+     * 
      * @param {string} project - Project ID or project name
      */
     public async getProcessConfiguration(
@@ -1691,12 +2114,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "f901ba42-86d2-4b0c-89c1-3f86d06daa84",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1717,8 +2140,10 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get rows on a board
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} board
+     * @param {string} board - Name or ID of the specific board
      */
     public async getBoardRows(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -1726,8 +2151,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardRow[]> {
 
         return new Promise<WorkInterfaces.BoardRow[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1737,12 +2166,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "0863355d-aefd-4d63-8669-984c9b7b0e78",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1763,9 +2192,11 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
-     * @param {WorkInterfaces.BoardRow[]} boardRows
+     * Update rows on a board
+     * 
+     * @param {WorkInterfaces.BoardRow[]} boardRows - List of board rows to update
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} board
+     * @param {string} board - Name or ID of the specific board
      */
     public async updateBoardRows(
         boardRows: WorkInterfaces.BoardRow[],
@@ -1774,8 +2205,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.BoardRow[]> {
 
         return new Promise<WorkInterfaces.BoardRow[]>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1785,12 +2220,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "0863355d-aefd-4d63-8669-984c9b7b0e78",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1811,8 +2246,10 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get team's days off for an iteration
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} iterationId
+     * @param {string} iterationId - ID of the iteration
      */
     public async getTeamDaysOff(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -1820,8 +2257,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamSettingsDaysOff> {
 
         return new Promise<WorkInterfaces.TeamSettingsDaysOff>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1831,12 +2272,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "2d4faa2e-9150-4cbf-a47a-932b1b4a0773",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1857,9 +2298,11 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
-     * @param {WorkInterfaces.TeamSettingsDaysOffPatch} daysOffPatch
+     * Set a team's days off for an iteration
+     * 
+     * @param {WorkInterfaces.TeamSettingsDaysOffPatch} daysOffPatch - Team's days off patch containting a list of start and end dates
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} iterationId
+     * @param {string} iterationId - ID of the iteration
      */
     public async updateTeamDaysOff(
         daysOffPatch: WorkInterfaces.TeamSettingsDaysOffPatch,
@@ -1868,8 +2311,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamSettingsDaysOff> {
 
         return new Promise<WorkInterfaces.TeamSettingsDaysOff>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1879,12 +2326,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "2d4faa2e-9150-4cbf-a47a-932b1b4a0773",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1905,6 +2352,8 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get a collection of team field values
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async getTeamFieldValues(
@@ -1912,8 +2361,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamFieldValues> {
 
         return new Promise<WorkInterfaces.TeamFieldValues>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1922,12 +2375,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "07ced576-58ed-49e6-9c1e-5cb53ab8bf2a",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1948,6 +2401,8 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Update team field values
+     * 
      * @param {WorkInterfaces.TeamFieldValuesPatch} patch
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
@@ -1957,8 +2412,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamFieldValues> {
 
         return new Promise<WorkInterfaces.TeamFieldValues>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -1967,12 +2426,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "07ced576-58ed-49e6-9c1e-5cb53ab8bf2a",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -1993,6 +2452,8 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
+     * Get a team's settings
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async getTeamSettings(
@@ -2000,8 +2461,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamSetting> {
 
         return new Promise<WorkInterfaces.TeamSetting>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -2010,12 +2475,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c3c1012b-bea7-49d7-b45e-1664e566f84c",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -2036,7 +2501,9 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
     }
 
     /**
-     * @param {WorkInterfaces.TeamSettingsPatch} teamSettingsPatch
+     * Update a team's settings
+     * 
+     * @param {WorkInterfaces.TeamSettingsPatch} teamSettingsPatch - TeamSettings changes
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async updateTeamSettings(
@@ -2045,8 +2512,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
         ): Promise<WorkInterfaces.TeamSetting> {
 
         return new Promise<WorkInterfaces.TeamSetting>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -2055,12 +2526,12 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "work",
                     "c3c1012b-bea7-49d7-b45e-1664e566f84c",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -2069,6 +2540,58 @@ export class WorkApi extends basem.ClientApiBase implements IWorkApi {
 
                 let ret = this.formatResponse(res.result,
                                               WorkInterfaces.TypeInfo.TeamSetting,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Get work items for iteration
+     * 
+     * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
+     * @param {string} iterationId - ID of the iteration
+     */
+    public async getIterationWorkItems(
+        teamContext: TfsCoreInterfaces.TeamContext,
+        iterationId: string
+        ): Promise<WorkInterfaces.IterationWorkItems> {
+
+        return new Promise<WorkInterfaces.IterationWorkItems>(async (resolve, reject) => {
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
+
+            let routeValues: any = {
+                project: project,
+                team: team,
+                iterationId: iterationId
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "work",
+                    "5b3ef1a6-d3ab-44cd-bafd-c7f45db850fa",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<WorkInterfaces.IterationWorkItems>;
+                res = await this.rest.get<WorkInterfaces.IterationWorkItems>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
                                               false);
 
                 resolve(ret);

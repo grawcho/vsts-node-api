@@ -1,8 +1,8 @@
-/*
+﻿/*
  * ---------------------------------------------------------
  * Copyright(C) Microsoft Corporation. All rights reserved.
  * ---------------------------------------------------------
- * 
+ *
  * ---------------------------------------------------------
  * Generated file, DO NOT EDIT
  * ---------------------------------------------------------
@@ -11,32 +11,41 @@
 // Licensed under the MIT license.  See LICENSE file in the project root for full license information.
 
 import * as restm from 'typed-rest-client/RestClient';
-import * as httpm from 'typed-rest-client/HttpClient';
 import vsom = require('./VsoClient');
 import basem = require('./ClientApiBases');
-import serm = require('./Serialization');
 import VsoBaseInterfaces = require('./interfaces/common/VsoBaseInterfaces');
 import NotificationInterfaces = require("./interfaces/NotificationInterfaces");
 import VSSInterfaces = require("./interfaces/common/VSSInterfaces");
 
 export interface INotificationApi extends basem.ClientApiBase {
     performBatchNotificationOperations(operation: NotificationInterfaces.BatchNotificationOperation): Promise<void>;
+    listLogs(source: string, entryId?: string, startTime?: Date, endTime?: Date): Promise<NotificationInterfaces.INotificationDiagnosticLog[]>;
+    getSubscriptionDiagnostics(subscriptionId: string): Promise<NotificationInterfaces.SubscriptionDiagnostics>;
+    updateSubscriptionDiagnostics(updateParameters: NotificationInterfaces.UpdateSubscripitonDiagnosticsParameters, subscriptionId: string): Promise<NotificationInterfaces.SubscriptionDiagnostics>;
     publishEvent(notificationEvent: VSSInterfaces.VssNotificationEvent): Promise<VSSInterfaces.VssNotificationEvent>;
+    transformEvent(transformRequest: NotificationInterfaces.EventTransformRequest): Promise<NotificationInterfaces.EventTransformResult>;
+    queryEventTypes(inputValuesQuery: NotificationInterfaces.FieldValuesQuery, eventType: string): Promise<NotificationInterfaces.NotificationEventField[]>;
     getEventType(eventType: string): Promise<NotificationInterfaces.NotificationEventType>;
     listEventTypes(publisherId?: string): Promise<NotificationInterfaces.NotificationEventType[]>;
+    getNotificationReasons(notificationId: number): Promise<NotificationInterfaces.NotificationReason>;
+    listNotificationReasons(notificationIds?: number): Promise<NotificationInterfaces.NotificationReason[]>;
+    getSettings(): Promise<NotificationInterfaces.NotificationAdminSettings>;
+    updateSettings(updateParameters: NotificationInterfaces.NotificationAdminSettingsUpdateParameters): Promise<NotificationInterfaces.NotificationAdminSettings>;
+    getSubscriber(subscriberId: string): Promise<NotificationInterfaces.NotificationSubscriber>;
+    updateSubscriber(updateParameters: NotificationInterfaces.NotificationSubscriberUpdateParameters, subscriberId: string): Promise<NotificationInterfaces.NotificationSubscriber>;
     querySubscriptions(subscriptionQuery: NotificationInterfaces.SubscriptionQuery): Promise<NotificationInterfaces.NotificationSubscription[]>;
     createSubscription(createParameters: NotificationInterfaces.NotificationSubscriptionCreateParameters): Promise<NotificationInterfaces.NotificationSubscription>;
     deleteSubscription(subscriptionId: string): Promise<void>;
     getSubscription(subscriptionId: string, queryFlags?: NotificationInterfaces.SubscriptionQueryFlags): Promise<NotificationInterfaces.NotificationSubscription>;
-    listSubscriptions(subscriber?: string, queryFlags?: NotificationInterfaces.SubscriptionQueryFlags): Promise<NotificationInterfaces.NotificationSubscription[]>;
+    listSubscriptions(targetId?: string, ids?: string[], queryFlags?: NotificationInterfaces.SubscriptionQueryFlags): Promise<NotificationInterfaces.NotificationSubscription[]>;
     updateSubscription(updateParameters: NotificationInterfaces.NotificationSubscriptionUpdateParameters, subscriptionId: string): Promise<NotificationInterfaces.NotificationSubscription>;
     getSubscriptionTemplates(): Promise<NotificationInterfaces.NotificationSubscriptionTemplate[]>;
     updateSubscriptionUserSettings(userSettings: NotificationInterfaces.SubscriptionUserSettings, subscriptionId: string, userId: string): Promise<NotificationInterfaces.SubscriptionUserSettings>;
 }
 
 export class NotificationApi extends basem.ClientApiBase implements INotificationApi {
-    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[]) {
-        super(baseUrl, handlers, 'node-Notification-api');
+    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions) {
+        super(baseUrl, handlers, 'node-Notification-api', options);
     }
 
     /**
@@ -52,12 +61,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "8f3c6ab2-5bae-4537-b16e-f84e0955599e",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -78,7 +87,141 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
     }
 
     /**
-     * Publish an event.
+     * List diagnostic logs this service.
+     * 
+     * @param {string} source
+     * @param {string} entryId
+     * @param {Date} startTime
+     * @param {Date} endTime
+     */
+    public async listLogs(
+        source: string,
+        entryId?: string,
+        startTime?: Date,
+        endTime?: Date
+        ): Promise<NotificationInterfaces.INotificationDiagnosticLog[]> {
+
+        return new Promise<NotificationInterfaces.INotificationDiagnosticLog[]>(async (resolve, reject) => {
+            let routeValues: any = {
+                source: source,
+                entryId: entryId
+            };
+
+            let queryValues: any = {
+                startTime: startTime,
+                endTime: endTime,
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "991842f3-eb16-4aea-ac81-81353ef2b75c",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.INotificationDiagnosticLog[]>;
+                res = await this.rest.get<NotificationInterfaces.INotificationDiagnosticLog[]>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.INotificationDiagnosticLog,
+                                              true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {string} subscriptionId
+     */
+    public async getSubscriptionDiagnostics(
+        subscriptionId: string
+        ): Promise<NotificationInterfaces.SubscriptionDiagnostics> {
+
+        return new Promise<NotificationInterfaces.SubscriptionDiagnostics>(async (resolve, reject) => {
+            let routeValues: any = {
+                subscriptionId: subscriptionId
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "20f1929d-4be7-4c2e-a74e-d47640ff3418",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.SubscriptionDiagnostics>;
+                res = await this.rest.get<NotificationInterfaces.SubscriptionDiagnostics>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.SubscriptionDiagnostics,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {NotificationInterfaces.UpdateSubscripitonDiagnosticsParameters} updateParameters
+     * @param {string} subscriptionId
+     */
+    public async updateSubscriptionDiagnostics(
+        updateParameters: NotificationInterfaces.UpdateSubscripitonDiagnosticsParameters,
+        subscriptionId: string
+        ): Promise<NotificationInterfaces.SubscriptionDiagnostics> {
+
+        return new Promise<NotificationInterfaces.SubscriptionDiagnostics>(async (resolve, reject) => {
+            let routeValues: any = {
+                subscriptionId: subscriptionId
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "20f1929d-4be7-4c2e-a74e-d47640ff3418",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.SubscriptionDiagnostics>;
+                res = await this.rest.replace<NotificationInterfaces.SubscriptionDiagnostics>(url, updateParameters, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.SubscriptionDiagnostics,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Publish an event. This request must be directed to the service "extmgmt".
      * 
      * @param {VSSInterfaces.VssNotificationEvent} notificationEvent
      */
@@ -92,12 +235,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "14c57b7a-c0e6-4555-9f51-e067188fdd8e",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -105,8 +248,89 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
                 res = await this.rest.create<VSSInterfaces.VssNotificationEvent>(url, notificationEvent, options);
 
                 let ret = this.formatResponse(res.result,
+                                              VSSInterfaces.TypeInfo.VssNotificationEvent,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Tranform a notification event.
+     * 
+     * @param {NotificationInterfaces.EventTransformRequest} transformRequest - Object to be transformed.
+     */
+    public async transformEvent(
+        transformRequest: NotificationInterfaces.EventTransformRequest
+        ): Promise<NotificationInterfaces.EventTransformResult> {
+
+        return new Promise<NotificationInterfaces.EventTransformResult>(async (resolve, reject) => {
+            let routeValues: any = {
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "9463a800-1b44-450e-9083-f948ea174b45",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.EventTransformResult>;
+                res = await this.rest.create<NotificationInterfaces.EventTransformResult>(url, transformRequest, options);
+
+                let ret = this.formatResponse(res.result,
                                               null,
                                               false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {NotificationInterfaces.FieldValuesQuery} inputValuesQuery
+     * @param {string} eventType
+     */
+    public async queryEventTypes(
+        inputValuesQuery: NotificationInterfaces.FieldValuesQuery,
+        eventType: string
+        ): Promise<NotificationInterfaces.NotificationEventField[]> {
+
+        return new Promise<NotificationInterfaces.NotificationEventField[]>(async (resolve, reject) => {
+            let routeValues: any = {
+                eventType: eventType
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "b5bbdd21-c178-4398-b6db-0166d910028a",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.NotificationEventField[]>;
+                res = await this.rest.create<NotificationInterfaces.NotificationEventField[]>(url, inputValuesQuery, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.NotificationEventField,
+                                              true);
 
                 resolve(ret);
                 
@@ -133,12 +357,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "cc84fb5f-6247-4c7a-aeae-e5a3c3fddb21",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -146,7 +370,7 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
                 res = await this.rest.get<NotificationInterfaces.NotificationEventType>(url, options);
 
                 let ret = this.formatResponse(res.result,
-                                              null,
+                                              NotificationInterfaces.TypeInfo.NotificationEventType,
                                               false);
 
                 resolve(ret);
@@ -177,13 +401,13 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "cc84fb5f-6247-4c7a-aeae-e5a3c3fddb21",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -191,8 +415,244 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
                 res = await this.rest.get<NotificationInterfaces.NotificationEventType[]>(url, options);
 
                 let ret = this.formatResponse(res.result,
-                                              null,
+                                              NotificationInterfaces.TypeInfo.NotificationEventType,
                                               true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {number} notificationId
+     */
+    public async getNotificationReasons(
+        notificationId: number
+        ): Promise<NotificationInterfaces.NotificationReason> {
+
+        return new Promise<NotificationInterfaces.NotificationReason>(async (resolve, reject) => {
+            let routeValues: any = {
+                notificationId: notificationId
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "19824fa9-1c76-40e6-9cce-cf0b9ca1cb60",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.NotificationReason>;
+                res = await this.rest.get<NotificationInterfaces.NotificationReason>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.NotificationReason,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {number} notificationIds
+     */
+    public async listNotificationReasons(
+        notificationIds?: number
+        ): Promise<NotificationInterfaces.NotificationReason[]> {
+
+        return new Promise<NotificationInterfaces.NotificationReason[]>(async (resolve, reject) => {
+            let routeValues: any = {
+            };
+
+            let queryValues: any = {
+                notificationIds: notificationIds,
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "19824fa9-1c76-40e6-9cce-cf0b9ca1cb60",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.NotificationReason[]>;
+                res = await this.rest.get<NotificationInterfaces.NotificationReason[]>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.NotificationReason,
+                                              true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     */
+    public async getSettings(
+        ): Promise<NotificationInterfaces.NotificationAdminSettings> {
+
+        return new Promise<NotificationInterfaces.NotificationAdminSettings>(async (resolve, reject) => {
+            let routeValues: any = {
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "cbe076d8-2803-45ff-8d8d-44653686ea2a",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.NotificationAdminSettings>;
+                res = await this.rest.get<NotificationInterfaces.NotificationAdminSettings>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.NotificationAdminSettings,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {NotificationInterfaces.NotificationAdminSettingsUpdateParameters} updateParameters
+     */
+    public async updateSettings(
+        updateParameters: NotificationInterfaces.NotificationAdminSettingsUpdateParameters
+        ): Promise<NotificationInterfaces.NotificationAdminSettings> {
+
+        return new Promise<NotificationInterfaces.NotificationAdminSettings>(async (resolve, reject) => {
+            let routeValues: any = {
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "cbe076d8-2803-45ff-8d8d-44653686ea2a",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.NotificationAdminSettings>;
+                res = await this.rest.update<NotificationInterfaces.NotificationAdminSettings>(url, updateParameters, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.NotificationAdminSettings,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {string} subscriberId
+     */
+    public async getSubscriber(
+        subscriberId: string
+        ): Promise<NotificationInterfaces.NotificationSubscriber> {
+
+        return new Promise<NotificationInterfaces.NotificationSubscriber>(async (resolve, reject) => {
+            let routeValues: any = {
+                subscriberId: subscriberId
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "4d5caff1-25ba-430b-b808-7a1f352cc197",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.NotificationSubscriber>;
+                res = await this.rest.get<NotificationInterfaces.NotificationSubscriber>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.NotificationSubscriber,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {NotificationInterfaces.NotificationSubscriberUpdateParameters} updateParameters
+     * @param {string} subscriberId
+     */
+    public async updateSubscriber(
+        updateParameters: NotificationInterfaces.NotificationSubscriberUpdateParameters,
+        subscriberId: string
+        ): Promise<NotificationInterfaces.NotificationSubscriber> {
+
+        return new Promise<NotificationInterfaces.NotificationSubscriber>(async (resolve, reject) => {
+            let routeValues: any = {
+                subscriberId: subscriberId
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "5.1-preview.1",
+                    "notification",
+                    "4d5caff1-25ba-430b-b808-7a1f352cc197",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<NotificationInterfaces.NotificationSubscriber>;
+                res = await this.rest.update<NotificationInterfaces.NotificationSubscriber>(url, updateParameters, options);
+
+                let ret = this.formatResponse(res.result,
+                                              NotificationInterfaces.TypeInfo.NotificationSubscriber,
+                                              false);
 
                 resolve(ret);
                 
@@ -218,12 +678,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "6864db85-08c0-4006-8e8e-cc1bebe31675",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -258,12 +718,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "70f911d6-abac-488c-85b3-a206bf57e165",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -299,12 +759,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "70f911d6-abac-488c-85b3-a206bf57e165",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -346,13 +806,13 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "70f911d6-abac-488c-85b3-a206bf57e165",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -373,13 +833,13 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
     }
 
     /**
-     * Get a list of subscriptions. If no subscriber is specified, subscriptions for the calling user are returned.
-     * 
-     * @param {string} subscriber
+     * @param {string} targetId
+     * @param {string[]} ids
      * @param {NotificationInterfaces.SubscriptionQueryFlags} queryFlags
      */
     public async listSubscriptions(
-        subscriber?: string,
+        targetId?: string,
+        ids?: string[],
         queryFlags?: NotificationInterfaces.SubscriptionQueryFlags
         ): Promise<NotificationInterfaces.NotificationSubscription[]> {
 
@@ -388,19 +848,20 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
             };
 
             let queryValues: any = {
-                subscriber: subscriber,
+                targetId: targetId,
+                ids: ids && ids.join(","),
                 queryFlags: queryFlags,
             };
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "70f911d6-abac-488c-85b3-a206bf57e165",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -438,12 +899,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "70f911d6-abac-488c-85b3-a206bf57e165",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -464,6 +925,8 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
     }
 
     /**
+     * Get available subscription templates.
+     * 
      */
     public async getSubscriptionTemplates(
         ): Promise<NotificationInterfaces.NotificationSubscriptionTemplate[]> {
@@ -474,12 +937,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "fa5d24ba-7484-4f3d-888d-4ec6b1974082",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -500,11 +963,11 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
     }
 
     /**
-     * Update the specified users' settings for the specified subscription. User settings can only be applied to shared subscriptions, like team subscriptions or default subscriptions. This API is typically used to opt in or out of a shared subscription.
+     * Update the specified user's settings for the specified subscription. This API is typically used to opt in or out of a shared subscription. User settings can only be applied to shared subscriptions, like team subscriptions or default subscriptions.
      * 
      * @param {NotificationInterfaces.SubscriptionUserSettings} userSettings
      * @param {string} subscriptionId
-     * @param {string} userId - ID of the user or "me" to indicate the calling user
+     * @param {string} userId - ID of the user
      */
     public async updateSubscriptionUserSettings(
         userSettings: NotificationInterfaces.SubscriptionUserSettings,
@@ -520,12 +983,12 @@ export class NotificationApi extends basem.ClientApiBase implements INotificatio
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "notification",
                     "ed5a3dff-aeb5-41b1-b4f7-89e66e58b62e",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 

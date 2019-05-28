@@ -1,6 +1,17 @@
-# Visual Studio Team Services Client for Node.js
+[![Build Status](https://dev.azure.com/ms/azure-devops-node-api/_apis/build/status/Microsoft.azure-devops-node-api?branchName=master)](https://dev.azure.com/ms/azure-devops-node-api/_build/latest?definitionId=89&branchName=master)
 
-Integrate with Visual Studio Team Services from your Node.js apps.
+# Azure DevOps Client for Node.js
+
+Integrate with Azure DevOps from your Node.js apps.
+
+### Install the library
+```
+npm install azure-devops-node-api --save
+```
+
+## News
+
+vso-node-api has been renamed and released as azure-devops-node-api
 
 ## Get started
 
@@ -10,84 +21,73 @@ See [samples](./samples) for complete coding examples
 
 ### Install the library
 ```
-npm install vso-node-api --save
+npm install azure-devops-node-api --save
 ```
-
-### Typings
-
-Typings (.d.ts) are now distributed with the api, so intellisense and compile support just works from `tsc` and [vscode]()  
 
 ![Intellisense](docs/intellisense.png)  
 
 ### Create a connection
 ```javascript
-let vsts = require('vso-node-api');
+import * as azdev from "azure-devops-node-api";
 
 // your collection url
-let collectionUrl = "https://fabrikam.visualstudio.com/defaultcollection";
+let orgUrl = "https://dev.azure.com/yourorgname";
 
-// ideally from config
-let token: string = "cbdeb34vzyuk5l4gxc4qfczn3lko3avfkfqyb47etahq6axpcqha"; 
+let token: string = process.env.AZURE_PERSONAL_ACCESS_TOKEN; // e.g "cbdeb34vzyuk5l4gxc4qfczn3lko3avfkfqyb47etahq6axpcqha"; 
 
-let authHandler = vsts.getPersonalAccessTokenHandler(token); 
-let connect = new vsts.WebApi(collectionUrl, authHandler);    
+let authHandler = azdev.getPersonalAccessTokenHandler(token); 
+let connection = new azdev.WebApi(orgUrl, authHandler);    
 ```
 
 ### Get an instance of a client
 
 ```javascript
-import * as ba from 'vso-node-api/BuildApi';
+import * as ba from "azure-devops-node-api/BuildApi";
 
-let vstsBuild: ba.IBuildApi = connection.getBuildApi();
+let build: ba.IBuildApi = await connection.getBuildApi();
 ```
 
 #### Available clients
 
-These clients are available in the new 6.x preview API (`npm install vso-node-api@preview`)
+These clients are available:
 
-* Accounts
 * Build
-* Chat
-* Contributions
 * Core
 * Dashboard
-* DelegatedAuthorization
 * ExtensionManagement
 * FeatureManagement
 * FileContainer
-* Gallery
 * Git
-* Identities
-* Licensing
 * Locations
 * Notification
-* Organization
 * Policy
 * Profile
+* ProjectAnalysis
 * Release
 * SecurityRoles
-* ServiceHooks
 * TaskAgent
 * Task
 * Test
 * Tfvc
-* Token
+* Wiki
 * Work
 * WorkItemTracking
+* WorkItemTrackingProcess
+* WorkItemTrackingProcessDefinitions
 
 ### Use the client
  
-Coding is easy using linear coding with async/await in typescript
+Coding is easy using linear coding with async/await in TypeScript
 
 ```javascript
-import * as bi from 'vso-node-api/interfaces/BuildInterfaces';
+import * as bi from "azure-devops-node-api/interfaces/BuildInterfaces";
 
 async function run() {
-    let project: string = 'myProject';
-    let defs: bi.DefinitionReference[] = await vstsBuild.getDefinitions(project);
+    let project: string = "myProject";
+    let defs: bi.DefinitionReference[] = await build.getDefinitions(project);
 
     defs.forEach((defRef: bi.DefinitionReference) => {
-        console.log(defRef.name + ' (' + defRef.id + ')');
+        console.log(`${defRef.name} (${defRef.id})`);
     });    
 }
 
@@ -96,7 +96,9 @@ run();
 
 ## APIs
 
-To see what APIs are available, see the appropriate client interface. For example, [GitApi.ts](https://github.com/Microsoft/vsts-node-api/blob/master/api/GitApi.ts)
+To see what APIs are available, see the appropriate client interface. For example, [GitApi.ts](https://github.com/Microsoft/azure-devops-node-api/blob/master/api/GitApi.ts)
+
+More detailed information for the endpoints of each API can be found at https://docs.microsoft.com/en-us/rest/api/vsts/?view=vsts-rest-4.1
 
 ## Running Samples
 
@@ -107,7 +109,7 @@ Run `npm install` first
 Set environment variables using set or export:
 
 ```bash
-API_URL=https://fabrikam.visualstudio.com/defaultcollection  
+API_URL=https://dev.azure.com/yourorgname
 
 // use your token
 API_TOKEN=cbdeb34vzyuk5l4gxc4qfczn3lko3avfkfqyb47etahq6axpcqha  
@@ -126,6 +128,18 @@ Run a specific sample:
 ```bash
 $ npm run samples -- http
 ```
+
+## API and TFS Mapping
+
+Below you'll find a quick mapping of azure-devops-node-api versions and their corresponding TFS releases. All API versions will work on the server version mentioned as well as later versions.
+
+ |**TFS Version** | **Node API VERSION**|
+ |-------------------|------------------|
+ |TFS 2018 Update 2  |  6.6.2|
+ |TFS 2017 Update 2  |  6.2.8-preview|
+ |TFS 2017 Update 1  |  5.1.2|
+ |TFS 2017 RTW       |  5.0.0|
+ |TFS 2015 Update 2  |  0.7.0|
 
 ## Contributing
 

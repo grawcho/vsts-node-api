@@ -1,8 +1,8 @@
-/*
+﻿/*
  * ---------------------------------------------------------
  * Copyright(C) Microsoft Corporation. All rights reserved.
  * ---------------------------------------------------------
- * 
+ *
  * ---------------------------------------------------------
  * Generated file, DO NOT EDIT
  * ---------------------------------------------------------
@@ -12,6 +12,9 @@
 
 
 
+/**
+ * Status of a container item.
+ */
 export enum ContainerItemStatus {
     /**
      * Item is created.
@@ -23,6 +26,9 @@ export enum ContainerItemStatus {
     PendingUpload = 2,
 }
 
+/**
+ * Type of a container item.
+ */
 export enum ContainerItemType {
     /**
      * Any item type.
@@ -38,6 +44,9 @@ export enum ContainerItemType {
     File = 2,
 }
 
+/**
+ * Options a container can have.
+ */
 export enum ContainerOptions {
     /**
      * No option.
@@ -56,19 +65,19 @@ export interface FileContainer {
     /**
      * Download Url for the content of this item.
      */
-    contentLocation: string;
+    contentLocation?: string;
     /**
      * Owner.
      */
-    createdBy: string;
+    createdBy?: string;
     /**
      * Creation date.
      */
-    dateCreated: Date;
+    dateCreated?: Date;
     /**
      * Description.
      */
-    description: string;
+    description?: string;
     /**
      * Id.
      */
@@ -76,35 +85,35 @@ export interface FileContainer {
     /**
      * Location of the item resource.
      */
-    itemLocation: string;
+    itemLocation?: string;
     /**
      * ItemStore Locator for this container.
      */
-    locatorPath: string;
+    locatorPath?: string;
     /**
      * Name.
      */
-    name: string;
+    name?: string;
     /**
      * Options the container can have.
      */
-    options: ContainerOptions;
+    options?: ContainerOptions;
     /**
      * Project Id.
      */
-    scopeIdentifier: string;
+    scopeIdentifier?: string;
     /**
      * Security token of the artifact associated with the container.
      */
-    securityToken: string;
+    securityToken?: string;
     /**
      * Identifier of the optional encryption key.
      */
-    signingKeyId: string;
+    signingKeyId?: string;
     /**
      * Total size of the files in bytes.
      */
-    size: number;
+    size?: number;
 }
 
 /**
@@ -115,47 +124,47 @@ export interface FileContainerItem {
      * Container Id.
      */
     containerId: number;
-    contentId: number[];
+    contentId?: number[];
     /**
      * Download Url for the content of this item.
      */
-    contentLocation: string;
+    contentLocation?: string;
     /**
      * Creator.
      */
-    createdBy: string;
+    createdBy?: string;
     /**
      * Creation date.
      */
-    dateCreated: Date;
+    dateCreated?: Date;
     /**
      * Last modified date.
      */
-    dateLastModified: Date;
+    dateLastModified?: Date;
     /**
      * Encoding of the file. Zero if not a file.
      */
-    fileEncoding: number;
+    fileEncoding?: number;
     /**
      * Hash value of the file. Null if not a file.
      */
-    fileHash: number[];
+    fileHash?: number[];
     /**
      * Id of the file content.
      */
-    fileId: number;
+    fileId?: number;
     /**
      * Length of the file. Zero if not of a file.
      */
-    fileLength: number;
+    fileLength?: number;
     /**
      * Type of the file. Zero if not a file.
      */
-    fileType: number;
+    fileType?: number;
     /**
      * Location of the item resource.
      */
-    itemLocation: string;
+    itemLocation?: string;
     /**
      * Type of the item: Folder, File or String.
      */
@@ -163,7 +172,7 @@ export interface FileContainerItem {
     /**
      * Modifier.
      */
-    lastModifiedBy: string;
+    lastModifiedBy?: string;
     /**
      * Unique path that identifies the item.
      */
@@ -171,12 +180,12 @@ export interface FileContainerItem {
     /**
      * Project Id.
      */
-    scopeIdentifier: string;
+    scopeIdentifier?: string;
     /**
      * Status of the item: Created or Pending Upload.
      */
     status: ContainerItemStatus;
-    ticket: string;
+    ticket?: string;
 }
 
 export var TypeInfo = {
@@ -210,7 +219,7 @@ TypeInfo.FileContainer.fields = {
     },
     options: {
         enumType: TypeInfo.ContainerOptions
-    },
+    }
 };
 
 TypeInfo.FileContainerItem.fields = {
@@ -225,5 +234,5 @@ TypeInfo.FileContainerItem.fields = {
     },
     status: {
         enumType: TypeInfo.ContainerItemStatus
-    },
+    }
 };

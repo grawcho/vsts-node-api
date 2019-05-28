@@ -1,8 +1,8 @@
-/*
+﻿/*
  * ---------------------------------------------------------
  * Copyright(C) Microsoft Corporation. All rights reserved.
  * ---------------------------------------------------------
- * 
+ *
  * ---------------------------------------------------------
  * Generated file, DO NOT EDIT
  * ---------------------------------------------------------
@@ -11,10 +11,8 @@
 // Licensed under the MIT license.  See LICENSE file in the project root for full license information.
 
 import * as restm from 'typed-rest-client/RestClient';
-import * as httpm from 'typed-rest-client/HttpClient';
 import vsom = require('./VsoClient');
 import basem = require('./ClientApiBases');
-import serm = require('./Serialization');
 import VsoBaseInterfaces = require('./interfaces/common/VsoBaseInterfaces');
 import DashboardInterfaces = require("./interfaces/DashboardInterfaces");
 import TfsCoreInterfaces = require("./interfaces/CoreInterfaces");
@@ -31,17 +29,21 @@ export interface IDashboardApi extends basem.ClientApiBase {
     getWidget(teamContext: TfsCoreInterfaces.TeamContext, dashboardId: string, widgetId: string): Promise<DashboardInterfaces.Widget>;
     replaceWidget(widget: DashboardInterfaces.Widget, teamContext: TfsCoreInterfaces.TeamContext, dashboardId: string, widgetId: string): Promise<DashboardInterfaces.Widget>;
     updateWidget(widget: DashboardInterfaces.Widget, teamContext: TfsCoreInterfaces.TeamContext, dashboardId: string, widgetId: string): Promise<DashboardInterfaces.Widget>;
-    getWidgetMetadata(contributionId: string): Promise<DashboardInterfaces.WidgetMetadataResponse>;
-    getWidgetTypes(scope: DashboardInterfaces.WidgetScope): Promise<DashboardInterfaces.WidgetTypesResponse>;
+    getWidgetMetadata(contributionId: string, project?: string): Promise<DashboardInterfaces.WidgetMetadataResponse>;
+    getWidgetTypes(scope: DashboardInterfaces.WidgetScope, project?: string): Promise<DashboardInterfaces.WidgetTypesResponse>;
 }
 
 export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
-    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[]) {
-        super(baseUrl, handlers, 'node-Dashboard-api');
+    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions) {
+        super(baseUrl, handlers, 'node-Dashboard-api', options);
     }
 
+    public static readonly RESOURCE_AREA_ID = "31c84e0a-3ece-48fd-a29d-100849af99ba";
+
     /**
-     * @param {DashboardInterfaces.Dashboard} dashboard
+     * Create the supplied dashboard.
+     * 
+     * @param {DashboardInterfaces.Dashboard} dashboard - The initial state of the dashboard
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async createDashboard(
@@ -50,8 +52,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Dashboard> {
 
         return new Promise<DashboardInterfaces.Dashboard>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -60,12 +66,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "454b3e51-2e6e-48d4-ad81-978154089351",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -86,8 +92,10 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
+     * Delete a dashboard given its ID. This also deletes the widgets associated with this dashboard.
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} dashboardId
+     * @param {string} dashboardId - ID of the dashboard to delete.
      */
     public async deleteDashboard(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -95,8 +103,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<void> {
 
         return new Promise<void>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -106,12 +118,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "454b3e51-2e6e-48d4-ad81-978154089351",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -132,6 +144,8 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
+     * Get a dashboard by its ID.
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      * @param {string} dashboardId
      */
@@ -141,8 +155,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Dashboard> {
 
         return new Promise<DashboardInterfaces.Dashboard>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -152,12 +170,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "454b3e51-2e6e-48d4-ad81-978154089351",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -178,6 +196,8 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
+     * Get a list of dashboards.
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
     public async getDashboards(
@@ -185,8 +205,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.DashboardGroup> {
 
         return new Promise<DashboardInterfaces.DashboardGroup>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -195,12 +219,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "454b3e51-2e6e-48d4-ad81-978154089351",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -221,9 +245,11 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
-     * @param {DashboardInterfaces.Dashboard} dashboard
+     * Replace configuration for the specified dashboard. Replaces Widget list on Dashboard, only if property is supplied.
+     * 
+     * @param {DashboardInterfaces.Dashboard} dashboard - The Configuration of the dashboard to replace.
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} dashboardId
+     * @param {string} dashboardId - ID of the dashboard to replace.
      */
     public async replaceDashboard(
         dashboard: DashboardInterfaces.Dashboard,
@@ -232,8 +258,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Dashboard> {
 
         return new Promise<DashboardInterfaces.Dashboard>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -243,12 +273,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "454b3e51-2e6e-48d4-ad81-978154089351",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -269,6 +299,8 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
+     * Update the name and position of dashboards in the supplied group, and remove omitted dashboards. Does not modify dashboard content.
+     * 
      * @param {DashboardInterfaces.DashboardGroup} group
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
      */
@@ -278,8 +310,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.DashboardGroup> {
 
         return new Promise<DashboardInterfaces.DashboardGroup>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -288,12 +324,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "454b3e51-2e6e-48d4-ad81-978154089351",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -314,9 +350,11 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
-     * @param {DashboardInterfaces.Widget} widget
+     * Create a widget on the specified dashboard.
+     * 
+     * @param {DashboardInterfaces.Widget} widget - State of the widget to add
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} dashboardId
+     * @param {string} dashboardId - ID of dashboard the widget will be added to.
      */
     public async createWidget(
         widget: DashboardInterfaces.Widget,
@@ -325,8 +363,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Widget> {
 
         return new Promise<DashboardInterfaces.Widget>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -336,12 +378,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "bdcff53a-8355-4172-a00a-40497ea23afc",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -362,9 +404,11 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
+     * Delete the specified widget.
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} dashboardId
-     * @param {string} widgetId
+     * @param {string} dashboardId - ID of the dashboard containing the widget.
+     * @param {string} widgetId - ID of the widget to update.
      */
     public async deleteWidget(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -373,8 +417,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Dashboard> {
 
         return new Promise<DashboardInterfaces.Dashboard>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -385,12 +433,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "bdcff53a-8355-4172-a00a-40497ea23afc",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -411,9 +459,11 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
+     * Get the current state of the specified widget.
+     * 
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} dashboardId
-     * @param {string} widgetId
+     * @param {string} dashboardId - ID of the dashboard containing the widget.
+     * @param {string} widgetId - ID of the widget to read.
      */
     public async getWidget(
         teamContext: TfsCoreInterfaces.TeamContext,
@@ -422,8 +472,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Widget> {
 
         return new Promise<DashboardInterfaces.Widget>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -434,12 +488,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "bdcff53a-8355-4172-a00a-40497ea23afc",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -460,10 +514,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
-     * @param {DashboardInterfaces.Widget} widget
+     * Override the  state of the specified widget.
+     * 
+     * @param {DashboardInterfaces.Widget} widget - State to be written for the widget.
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} dashboardId
-     * @param {string} widgetId
+     * @param {string} dashboardId - ID of the dashboard containing the widget.
+     * @param {string} widgetId - ID of the widget to update.
      */
     public async replaceWidget(
         widget: DashboardInterfaces.Widget,
@@ -473,8 +529,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Widget> {
 
         return new Promise<DashboardInterfaces.Widget>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -485,12 +545,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "bdcff53a-8355-4172-a00a-40497ea23afc",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -511,10 +571,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
-     * @param {DashboardInterfaces.Widget} widget
+     * Perform a partial update of the specified widget.
+     * 
+     * @param {DashboardInterfaces.Widget} widget - Description of the widget changes to apply. All non-null fields will be replaced.
      * @param {TfsCoreInterfaces.TeamContext} teamContext - The team context for the operation
-     * @param {string} dashboardId
-     * @param {string} widgetId
+     * @param {string} dashboardId - ID of the dashboard containing the widget.
+     * @param {string} widgetId - ID of the widget to update.
      */
     public async updateWidget(
         widget: DashboardInterfaces.Widget,
@@ -524,8 +586,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
         ): Promise<DashboardInterfaces.Widget> {
 
         return new Promise<DashboardInterfaces.Widget>(async (resolve, reject) => {
-            let project = teamContext.projectId || teamContext.project;
-            let team = teamContext.teamId || teamContext.team;
+            let project = null;
+            let team = null;
+            if (teamContext) {
+                project = teamContext.projectId || teamContext.project;
+                team = teamContext.teamId || teamContext.team;
+            }
 
             let routeValues: any = {
                 project: project,
@@ -536,12 +602,12 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.2",
+                    "5.1-preview.2",
                     "Dashboard",
                     "bdcff53a-8355-4172-a00a-40497ea23afc",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -562,25 +628,30 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
-     * @param {string} contributionId
+     * Get the widget metadata satisfying the specified contribution ID.
+     * 
+     * @param {string} contributionId - The ID of Contribution for the Widget
+     * @param {string} project - Project ID or project name
      */
     public async getWidgetMetadata(
-        contributionId: string
+        contributionId: string,
+        project?: string
         ): Promise<DashboardInterfaces.WidgetMetadataResponse> {
 
         return new Promise<DashboardInterfaces.WidgetMetadataResponse>(async (resolve, reject) => {
             let routeValues: any = {
+                project: project,
                 contributionId: contributionId
             };
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Dashboard",
                     "6b3628d3-e96f-4fc7-b176-50240b03b515",
                     routeValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -601,16 +672,22 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
     }
 
     /**
-     * Returns available widgets in alphabetical order.
+     * Get all available widget metadata in alphabetical order.
      * 
      * @param {DashboardInterfaces.WidgetScope} scope
+     * @param {string} project - Project ID or project name
      */
     public async getWidgetTypes(
-        scope: DashboardInterfaces.WidgetScope
+        scope: DashboardInterfaces.WidgetScope,
+        project?: string
         ): Promise<DashboardInterfaces.WidgetTypesResponse> {
+        if (scope == null) {
+            throw new TypeError('scope can not be null or undefined');
+        }
 
         return new Promise<DashboardInterfaces.WidgetTypesResponse>(async (resolve, reject) => {
             let routeValues: any = {
+                project: project
             };
 
             let queryValues: any = {
@@ -619,13 +696,13 @@ export class DashboardApi extends basem.ClientApiBase implements IDashboardApi {
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.1",
+                    "5.1-preview.1",
                     "Dashboard",
                     "6b3628d3-e96f-4fc7-b176-50240b03b515",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 

@@ -1,4 +1,18 @@
 [
     "build",
-    "task"
+    "buildArtifact",
+    "creation",
+    "dashboard",
+    "extensionManagement",
+    "filecontainer",
+    "git",
+    "policy",
+    "profile",
+    "projectAnalysis",
+    "release",
+    "task",
+    "test",
+    "wiki",
+    "work",
+    "workItemTracking"
 ]

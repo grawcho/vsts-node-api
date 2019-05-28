@@ -1,8 +1,8 @@
-/*
+﻿/*
  * ---------------------------------------------------------
  * Copyright(C) Microsoft Corporation. All rights reserved.
  * ---------------------------------------------------------
- * 
+ *
  * ---------------------------------------------------------
  * Generated file, DO NOT EDIT
  * ---------------------------------------------------------
@@ -11,10 +11,8 @@
 // Licensed under the MIT license.  See LICENSE file in the project root for full license information.
 
 import * as restm from 'typed-rest-client/RestClient';
-import * as httpm from 'typed-rest-client/HttpClient';
 import vsom = require('./VsoClient');
 import basem = require('./ClientApiBases');
-import serm = require('./Serialization');
 import VsoBaseInterfaces = require('./interfaces/common/VsoBaseInterfaces');
 import FileContainerInterfaces = require("./interfaces/FileContainerInterfaces");
 import VSSInterfaces = require("./interfaces/common/VSSInterfaces");
@@ -27,8 +25,8 @@ export interface IFileContainerApiBase extends basem.ClientApiBase {
 }
 
 export class FileContainerApiBase extends basem.ClientApiBase implements IFileContainerApiBase {
-    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[]) {
-        super(baseUrl, handlers, 'node-FileContainer-api');
+    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions) {
+        super(baseUrl, handlers, 'node-FileContainer-api', options);
     }
 
     /**
@@ -55,13 +53,13 @@ export class FileContainerApiBase extends basem.ClientApiBase implements IFileCo
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.4",
+                    "5.1-preview.4",
                     "Container",
                     "e4f5c81e-e250-447b-9fef-bd48471bea5e",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -93,6 +91,9 @@ export class FileContainerApiBase extends basem.ClientApiBase implements IFileCo
         itemPath: string,
         scope?: string
         ): Promise<void> {
+        if (itemPath == null) {
+            throw new TypeError('itemPath can not be null or undefined');
+        }
 
         return new Promise<void>(async (resolve, reject) => {
             let routeValues: any = {
@@ -106,13 +107,13 @@ export class FileContainerApiBase extends basem.ClientApiBase implements IFileCo
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.4",
+                    "5.1-preview.4",
                     "Container",
                     "e4f5c81e-e250-447b-9fef-bd48471bea5e",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -154,13 +155,13 @@ export class FileContainerApiBase extends basem.ClientApiBase implements IFileCo
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.4",
+                    "5.1-preview.4",
                     "Container",
                     "e4f5c81e-e250-447b-9fef-bd48471bea5e",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
@@ -218,13 +219,13 @@ export class FileContainerApiBase extends basem.ClientApiBase implements IFileCo
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "3.2-preview.4",
+                    "5.1-preview.4",
                     "Container",
                     "e4f5c81e-e250-447b-9fef-bd48471bea5e",
                     routeValues,
                     queryValues);
 
-                let url: string = verData.requestUrl;
+                let url: string = verData.requestUrl!;
                 let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
                                                                                 verData.apiVersion);
 
