@@ -95,7 +95,7 @@ export interface IGitApi extends basem.ClientApiBase {
     updatePullRequestReviewers(patchVotes: GitInterfaces.IdentityRefWithVote[], repositoryId: string, pullRequestId: number, project?: string): Promise<void>;
     getPullRequestById(pullRequestId: number, project?: string): Promise<GitInterfaces.GitPullRequest>;
     getPullRequestsByProject(project: string, searchCriteria: GitInterfaces.GitPullRequestSearchCriteria, maxCommentLength?: number, skip?: number, top?: number): Promise<GitInterfaces.GitPullRequest[]>;
-    createPullRequest(gitPullRequestToCreate: GitInterfaces.GitPullRequest, repositoryId: string, project?: string, supportsIterations?: boolean): Promise<GitInterfaces.GitPullRequest>;
+    createPullRequest(gitPullRequestToCreate: GitInterfaces.GitPullRequest, repositoryId: string, project?: string, linkCommitWorkItems?: boolean, supportsIterations?: boolean): Promise<GitInterfaces.GitPullRequest>;
     getPullRequest(repositoryId: string, pullRequestId: number, project?: string, maxCommentLength?: number, skip?: number, top?: number, includeCommits?: boolean, includeWorkItemRefs?: boolean): Promise<GitInterfaces.GitPullRequest>;
     getPullRequests(repositoryId: string, searchCriteria: GitInterfaces.GitPullRequestSearchCriteria, project?: string, maxCommentLength?: number, skip?: number, top?: number): Promise<GitInterfaces.GitPullRequest[]>;
     updatePullRequest(gitPullRequestToUpdate: GitInterfaces.GitPullRequest, repositoryId: string, pullRequestId: number, project?: string): Promise<GitInterfaces.GitPullRequest>;
@@ -4162,11 +4162,13 @@ export class GitApi extends basem.ClientApiBase implements IGitApi {
      * @param {string} repositoryId - The repository ID of the pull request's target branch.
      * @param {string} project - Project ID or project name
      * @param {boolean} supportsIterations - If true, subsequent pushes to the pull request will be individually reviewable. Set this to false for large pull requests for performance reasons if this functionality is not needed.
+     * @param {boolean} linkCommitWorkItems - If true, work items that are linked to commits in this pull request will be linked to the pull request.
      */
     public async createPullRequest(
         gitPullRequestToCreate: GitInterfaces.GitPullRequest,
         repositoryId: string,
         project?: string,
+        linkCommitWorkItems?: boolean,
         supportsIterations?: boolean
         ): Promise<GitInterfaces.GitPullRequest> {
 
@@ -4177,6 +4179,7 @@ export class GitApi extends basem.ClientApiBase implements IGitApi {
             };
 
             let queryValues: any = {
+                linkCommitWorkItems: linkCommitWorkItems,
                 supportsIterations: supportsIterations,
             };
             
