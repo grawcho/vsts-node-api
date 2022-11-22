@@ -4,8 +4,9 @@ import nock = require('nock');
 import os = require('os');
 import vsom = require('../../_build/VsoClient');
 import WebApi = require('../../_build/WebApi');
-import * as rm from '../../_build/node_modules/typed-rest-client/RestClient';
+import * as rm from 'typed-rest-client/RestClient';
 import { ApiResourceLocation } from '../../_build/interfaces/common/VsoBaseInterfaces';
+import semver = require('semver');
 
 describe('VSOClient Units', function () {
     let rest: rm.RestClient;
@@ -180,7 +181,9 @@ describe('VSOClient Units', function () {
 
         //Assert
         assert.equal(res.apiVersion, '1');
-        assert.equal(res.requestUrl, 'https://dev.azure.com/testTemplate?min=Wed%2C%2019%20Oct%200208%2000%3A00%3A00%20GMT');
+        //Use different strings for Node 6 and 8, because of a varied response string
+        var expectedURL = semver.lt(process.versions.node, '8.0.0') ? 'https://dev.azure.com/testTemplate?min=Wed%2C%2019%20Oct%20%20208%2000%3A00%3A00%20GMT' : 'https://dev.azure.com/testTemplate?min=Wed%2C%2019%20Oct%200208%2000%3A00%3A00%20GMT';
+        assert.equal(res.requestUrl, expectedURL);
     });
 
     it('gets versioning data after an initialization promise', async () => {
@@ -297,5 +300,37 @@ describe('WebApi Units', function () {
         assert.equal(myWebApi.isNoProxyHost('https://dev.azure.com/myproject'), true);
         assert.equal(myWebApi.isNoProxyHost('https://my-tfs-instance.host/myproject'), true);
         assert.equal(myWebApi.isNoProxyHost('https://my-other-tfs-instance.host/myproject'), false);
+    });
+});
+
+describe('Auth Handlers Units', function () {
+    it('cross origin authenthication should be allowed by default in BasicCredentialHandler', () => {
+        const basicAuthHandler = WebApi.getBasicHandler('user', 'password');
+        assert(basicAuthHandler['allowCrossOriginAuthentication'] === true);
+    });
+
+    it('cross origin authenthication should be allowed by default in BearerCredentialHandler', () => {
+        const bearerAuthHandler = WebApi.getBearerHandler('0000000000000000000000000000000000000000');
+        assert(bearerAuthHandler['allowCrossOriginAuthentication'] === true);
+    });
+
+    it('cross origin authenthication should be allowed by default in PersonalAccessTokenCredentialHandler', () => {
+        const personalAccessTokenAuthHandler = WebApi.getPersonalAccessTokenHandler('0000000000000000000000000000000000000000');
+        assert(personalAccessTokenAuthHandler['allowCrossOriginAuthentication']  === true);
+    });
+
+    it('cross origin authenthication could be disabled in BasicCredentialHandler', () => {
+        const basicAuthHandler = WebApi.getBasicHandler('user', 'password', false);  
+        assert(basicAuthHandler['allowCrossOriginAuthentication'] === false);
+    });
+
+    it('cross origin authenthication could be disabled in BearerCredentialHandler', () => {
+        const bearerAuthHandler = WebApi.getBearerHandler('0000000000000000000000000000000000000000', false);
+        assert(bearerAuthHandler['allowCrossOriginAuthentication'] === false);
+    });
+
+    it('cross origin authenthication could be disabled in PersonalAccessTokenCredentialHandler', () => {
+        const personalAccessTokenAuthHandler = WebApi.getPersonalAccessTokenHandler('0000000000000000000000000000000000000000', false);
+        assert(personalAccessTokenAuthHandler['allowCrossOriginAuthentication'] === false);
     });
 });

@@ -470,6 +470,21 @@ export interface CloneStatistics {
     totalTestCasesCount?: number;
 }
 
+export interface CloneTestCaseOptions {
+    /**
+     * If set to true, include the attachments
+     */
+    includeAttachments?: boolean;
+    /**
+     * If set to true, include the links
+     */
+    includeLinks?: boolean;
+    /**
+     * Comment on the link that will link the new clone  test case to the original Set null for no comment
+     */
+    relatedLinkComment?: string;
+}
+
 /**
  * Represents the build configuration (platform, flavor) and coverage data for the build
  */
@@ -613,6 +628,10 @@ export enum CoverageSummaryStatus {
      * The summary evaluation is pending
      */
     Pending = 4,
+    /**
+     * Summary evaluation may be ongoing but another merge has been requested.
+     */
+    UpdateRequestQueued = 5,
 }
 
 export interface CreateTestMessageLogEntryRequest {
@@ -710,7 +729,7 @@ export interface FailingSince {
      */
     build?: BuildReference;
     /**
-     * Time since failing.
+     * Time since failing(UTC).
      */
     date: Date;
     /**
@@ -871,15 +890,15 @@ export interface JobReference {
  */
 export interface LastResultDetails {
     /**
-     * CompletedDate of LastResult.
+     * Completed date of last result.
      */
     dateCompleted?: Date;
     /**
-     * Duration of LastResult.
+     * Duration of the last result in milliseconds.
      */
     duration?: number;
     /**
-     * RunBy.
+     * The user who executed the last result.
      */
     runBy?: VSSInterfaces.IdentityRef;
 }
@@ -1180,6 +1199,13 @@ export interface NameValuePair {
      * Value
      */
     value?: string;
+}
+
+export interface NewTestResultLoggingSettings {
+    /**
+     * LogNewTests defines whether or not we will record new test cases coming into the system
+     */
+    logNewTests?: boolean;
 }
 
 export enum OperationType {
@@ -1486,7 +1512,7 @@ export interface ReleaseReference {
      */
     attempt?: number;
     /**
-     * Release Creation Date.
+     * Release Creation Date(UTC).
      */
     creationDate?: Date;
     /**
@@ -1494,7 +1520,7 @@ export interface ReleaseReference {
      */
     definitionId?: number;
     /**
-     * Environment creation Date.
+     * Environment creation Date(UTC).
      */
     environmentCreationDate?: Date;
     /**
@@ -1914,7 +1940,7 @@ export interface RunCreateModel {
      */
     startDate?: string;
     /**
-     * The state of the run. Type TestRunState Valid states - Unspecified ,NotStarted, InProgress, Completed, Waiting, Aborted, NeedsInvestigation
+     * The state of the run. Type TestRunState Valid states - NotStarted, InProgress, Waiting
      */
     state?: string;
     /**
@@ -2420,7 +2446,7 @@ export interface TestActionResult2 {
  */
 export interface TestActionResultModel extends TestResultModelBase {
     /**
-     * Path identifier test step in test case workitem.
+     * Path identifier for test step in test case workitem. Note: 1) It is represented in Hexadecimal format with 8 digits for a step. 2) Internally, the step ID value for first step starts with 2 so actionPath = 00000002 step 9, will have an ID = 10 and actionPath = 0000000a step 15, will have an ID =16 and actionPath = 00000010 3) actionPath of shared step is concatenated with the parent step of test case. Example, it would be something of type -  0000000300000001 where 00000003 denotes action path of test step and 00000001 denotes action path for shared step
      */
     actionPath?: string;
     /**
@@ -2436,7 +2462,7 @@ export interface TestActionResultModel extends TestResultModelBase {
      */
     stepIdentifier?: string;
     /**
-     * Url of test action result.
+     * Url of test action result. Deprecated in hosted environment.
      */
     url?: string;
 }
@@ -2598,7 +2624,7 @@ export interface TestCaseResult {
      */
     comment?: string;
     /**
-     * Time when test execution completed. Completed date should be greater than StartedDate.
+     * Time when test execution completed(UTC). Completed date should be greater than StartedDate.
      */
     completedDate?: Date;
     /**
@@ -2610,7 +2636,7 @@ export interface TestCaseResult {
      */
     configuration?: ShallowReference;
     /**
-     * Timestamp when test result created.
+     * Timestamp when test result created(UTC).
      */
     createdDate?: Date;
     /**
@@ -2646,7 +2672,7 @@ export interface TestCaseResult {
      */
     lastUpdatedBy?: VSSInterfaces.IdentityRef;
     /**
-     * Last updated datetime of test result.
+     * Last updated datetime of test result(UTC).
      */
     lastUpdatedDate?: Date;
     /**
@@ -2702,7 +2728,7 @@ export interface TestCaseResult {
      */
     stackTrace?: string;
     /**
-     * Time when test execution started.
+     * Time when test execution started(UTC).
      */
     startedDate?: Date;
     /**
@@ -3031,7 +3057,7 @@ export interface TestIterationDetailsModel {
      */
     comment?: string;
     /**
-     * Time when execution completed.
+     * Time when execution completed(UTC).
      */
     completedDate?: Date;
     /**
@@ -3055,7 +3081,7 @@ export interface TestIterationDetailsModel {
      */
     parameters?: TestResultParameterModel[];
     /**
-     * Time when execution started.
+     * Time when execution started(UTC).
      */
     startedDate?: Date;
     /**
@@ -3921,7 +3947,7 @@ export interface TestResultModelBase {
      */
     comment?: string;
     /**
-     * Time when execution completed.
+     * Time when execution completed(UTC).
      */
     completedDate?: Date;
     /**
@@ -3937,7 +3963,7 @@ export interface TestResultModelBase {
      */
     outcome?: string;
     /**
-     * Time when execution started.
+     * Time when execution started(UTC).
      */
     startedDate?: Date;
 }
@@ -3973,7 +3999,7 @@ export interface TestResultParameterModel {
      */
     stepIdentifier?: string;
     /**
-     * Url of test parameter.
+     * Url of test parameter. Deprecated in hosted environment.
      */
     url?: string;
     /**
@@ -4075,6 +4101,7 @@ export interface TestResultsSettings {
      * IsRequired and EmitDefaultValue are passed as false as if users doesn't pass anything, should not come for serialisation and deserialisation.
      */
     flakySettings?: FlakySettings;
+    newTestResultLoggingSettings?: NewTestResultLoggingSettings;
 }
 
 export enum TestResultsSettingsType {
@@ -4086,6 +4113,10 @@ export enum TestResultsSettingsType {
      * Returns Flaky Test Settings.
      */
     Flaky = 2,
+    /**
+     * Returns whether to log new tests or not
+     */
+    NewTestLogging = 3,
 }
 
 export interface TestResultSummary {
@@ -4102,6 +4133,10 @@ export interface TestResultsUpdateSettings {
      * FlakySettings defines Flaky Settings Data.
      */
     flakySettings?: FlakySettings;
+    /**
+     * NewTestResultLoggingSettings defines the setting for logging new test results
+     */
+    newTestResultLoggingSettings?: NewTestResultLoggingSettings;
 }
 
 export interface TestResultsWithWatermark {
@@ -4788,7 +4823,7 @@ export interface TestSubResult {
      */
     comment?: string;
     /**
-     * Time when test execution completed.
+     * Time when test execution completed(UTC).
      */
     completedDate?: Date;
     /**
@@ -4820,7 +4855,7 @@ export interface TestSubResult {
      */
     id?: number;
     /**
-     * Time when result last updated.
+     * Time when result last updated(UTC).
      */
     lastUpdatedDate?: Date;
     /**
@@ -4844,7 +4879,7 @@ export interface TestSubResult {
      */
     stackTrace?: string;
     /**
-     * Time when test execution started.
+     * Time when test execution started(UTC).
      */
     startedDate?: Date;
     /**
@@ -5182,7 +5217,8 @@ export var TypeInfo = {
             "inProgress": 1,
             "completed": 2,
             "finalized": 3,
-            "pending": 4
+            "pending": 4,
+            "updateRequestQueued": 5
         }
     },
     CreateTestMessageLogEntryRequest: <any>{
@@ -5556,7 +5592,8 @@ export var TypeInfo = {
     TestResultsSettingsType: {
         enumValues: {
             "all": 1,
-            "flaky": 2
+            "flaky": 2,
+            "newTestLogging": 3
         }
     },
     TestResultSummary: <any>{

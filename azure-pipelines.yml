@@ -1,8 +1,26 @@
+pool:
+  vmImage: ubuntu-18.04
+
+strategy:
+  matrix:
+    'Node 6':
+      versionSpec: '6.x'
+    'Node 8': 
+      versionSpec: '8.x'
+    'Node 10': 
+      versionSpec: '10.x'
+    'Node 12': 
+      versionSpec: '12.x'
+    'Node 14': 
+      versionSpec: '14.x'
+    'Node 16':
+      versionSpec: '16.x'
+
 steps:
 - task: NodeTool@0
   inputs:
-    versionSpec: "8.x"
-  displayName: Install node 8
+    versionSpec: $(versionSpec)
+  displayName: Install node
 
 # install dependencies
 - script: npm install
@@ -14,3 +32,13 @@ steps:
 
 - script: npm run units
   displayName: Run unit tests
+
+# For CI runs on master, automatically publish packages
+- bash: |
+      echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+      cd _build
+      npm publish || true # Ignore publish failures, usually will happen because package already exists
+  displayName: npm publish
+  condition: and(succeeded(), in(variables['build.reason'], 'IndividualCI', 'BatchedCI', 'Manual'), eq(variables['build.sourcebranchname'], 'master'))
+  env:
+    NPM_TOKEN: $(npmPublishToken)

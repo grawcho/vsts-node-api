@@ -242,6 +242,53 @@ export interface CustomerLastContact {
     lastContactDate?: Date;
 }
 
+/**
+ * An entity representing the data required to create a Customer Support Request.
+ */
+export interface CustomerSupportRequest {
+    /**
+     * Display name of extension in concern
+     */
+    displayName?: string;
+    /**
+     * Email of user making the support request
+     */
+    emailId?: string;
+    /**
+     * Extension name
+     */
+    extensionName?: string;
+    /**
+     * Link to the extension details page
+     */
+    extensionURL?: string;
+    /**
+     * User-provided support request message.
+     */
+    message?: string;
+    /**
+     * Publisher name
+     */
+    publisherName?: string;
+    /**
+     * Reason for support request
+     */
+    reason?: string;
+    reCaptchaToken?: string;
+    /**
+     * VSID of the user making the support request
+     */
+    reporterVSID?: string;
+    /**
+     * Review under concern
+     */
+    review?: Review;
+    /**
+     * The UI source through which the request was made
+     */
+    sourceLink?: string;
+}
+
 export enum DraftPatchOperation {
     Publish = 1,
     Cancel = 2,
@@ -426,6 +473,7 @@ export interface ExtensionDraftAsset extends ExtensionFile {
 export interface ExtensionDraftPatch {
     extensionData?: UnpackagedExtensionData;
     operation?: DraftPatchOperation;
+    reCaptchaToken?: string;
 }
 
 /**
@@ -709,6 +757,14 @@ export enum ExtensionQueryFilterType {
      * Filter to get extensions shared with particular organization
      */
     OrganizationSharedWith = 21,
+    /**
+     * Filter to get VS IDE extensions by Product Architecture
+     */
+    ProductArchitecture = 22,
+    /**
+     * Filter to get VS Code extensions by target platform.
+     */
+    TargetPlatform = 23,
 }
 
 /**
@@ -780,6 +836,10 @@ export enum ExtensionQueryFlags {
      */
     IncludeSharedOrganizations = 16384,
     /**
+     * Include the details if an extension is in conflict list or not Currently being used for VSCode extensions.
+     */
+    IncludeNameConflictInfo = 32768,
+    /**
      * AllAttributes is designed to be a mask that defines all sub-elements of the extension should be returned.  NOTE: This is not actually All flags. This is now locked to the set defined since changing this enum would be a breaking change and would change the behavior of anyone using it. Try not to use this value when making calls to the service, instead be explicit about the options required.
      */
     AllAttributes = 16863,
@@ -837,6 +897,7 @@ export interface ExtensionVersion {
     flags?: ExtensionVersionFlags;
     lastUpdated?: Date;
     properties?: { key: string; value: string }[];
+    targetPlatform?: string;
     validationResultMessage?: string;
     version?: string;
     versionDescription?: string;
@@ -868,7 +929,10 @@ export interface FilterCriteria {
 }
 
 export interface InstallationTarget {
+    extensionVersion?: string;
+    productArchitecture?: string;
     target?: string;
+    targetPlatform?: string;
     targetVersion?: string;
 }
 
@@ -977,6 +1041,10 @@ export interface PublishedExtension {
     lastUpdated?: Date;
     longDescription?: string;
     /**
+     * Check if Extension is in conflict list or not. Taking as String and not as boolean because we don't want end customer to see this flag and by making it Boolean it is coming as false for all the cases.
+     */
+    presentInConflictList?: string;
+    /**
      * Date on which the extension was first uploaded.
      */
     publishedDate?: Date;
@@ -1056,6 +1124,10 @@ export enum PublishedExtensionFlags {
 
 export interface Publisher extends PublisherBase {
     _links?: any;
+    domain?: string;
+    isDnsTokenVerified?: boolean;
+    isDomainVerified?: boolean;
+    reCaptchaToken?: string;
 }
 
 /**
@@ -1079,7 +1151,9 @@ export interface PublisherBase {
  */
 export interface PublisherFacts {
     displayName?: string;
+    domain?: string;
     flags?: PublisherFlags;
+    isDomainVerified?: boolean;
     publisherId?: string;
     publisherName?: string;
 }
@@ -1399,6 +1473,7 @@ export interface QueryFilter {
  * The structure of the question / thread
  */
 export interface Question extends QnAItem {
+    reCaptchaToken?: string;
     /**
      * List of answers in for the question / thread
      */
@@ -1431,6 +1506,7 @@ export interface RatingCountPerRating {
  * The structure of a response
  */
 export interface Response extends QnAItem {
+    reCaptchaToken?: string;
 }
 
 /**
@@ -1503,6 +1579,7 @@ export interface Review {
      * Rating provided by the user
      */
     rating?: number;
+    reCaptchaToken?: string;
     /**
      * Reply, if any, for this review
      */
@@ -1884,6 +1961,12 @@ export interface UserReportedConcern {
     userId?: string;
 }
 
+export enum VSCodeWebExtensionStatisicsType {
+    Install = 1,
+    Update = 2,
+    Uninstall = 3,
+}
+
 export var TypeInfo = {
     AcquisitionAssignmentType: {
         enumValues: {
@@ -1926,6 +2009,8 @@ export var TypeInfo = {
         }
     },
     CustomerLastContact: <any>{
+    },
+    CustomerSupportRequest: <any>{
     },
     DraftPatchOperation: {
         enumValues: {
@@ -2014,7 +2099,9 @@ export var TypeInfo = {
             "publisherName": 18,
             "publisherDisplayName": 19,
             "includeWithPublisherFlags": 20,
-            "organizationSharedWith": 21
+            "organizationSharedWith": 21,
+            "productArchitecture": 22,
+            "targetPlatform": 23
         }
     },
     ExtensionQueryFlags: {
@@ -2035,6 +2122,7 @@ export var TypeInfo = {
             "includeMinimalPayloadForVsIde": 4096,
             "includeLcids": 8192,
             "includeSharedOrganizations": 16384,
+            "includeNameConflictInfo": 32768,
             "allAttributes": 16863
         }
     },
@@ -2258,6 +2346,13 @@ export var TypeInfo = {
     },
     UserReportedConcern: <any>{
     },
+    VSCodeWebExtensionStatisicsType: {
+        enumValues: {
+            "install": 1,
+            "update": 2,
+            "uninstall": 3
+        }
+    },
 };
 
 TypeInfo.AcquisitionOperation.fields = {
@@ -2303,6 +2398,12 @@ TypeInfo.Concern.fields = {
 TypeInfo.CustomerLastContact.fields = {
     lastContactDate: {
         isDate: true,
+    }
+};
+
+TypeInfo.CustomerSupportRequest.fields = {
+    review: {
+        typeInfo: TypeInfo.Review
     }
 };
 
