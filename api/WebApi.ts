@@ -3,6 +3,7 @@
 
 import VsoBaseInterfaces = require('./interfaces/common/VsoBaseInterfaces');
 import basem = require('./ClientApiBases');
+import alertm = require('./AlertApi');
 import buildm = require('./BuildApi');
 import corem = require('./CoreApi');
 import dashboardm = require('./DashboardApi');
@@ -12,6 +13,7 @@ import filecontainerm = require('./FileContainerApi');
 import gallerym = require('./GalleryApi');
 import gitm = require('./GitApi');
 import locationsm = require('./LocationsApi');
+import managementm = require('./ManagementApi');
 import notificationm = require('./NotificationApi');
 import policym = require('./PolicyApi');
 import profilem = require('./ProfileApi');
@@ -21,6 +23,8 @@ import securityrolesm = require('./SecurityRolesApi');
 import taskagentm = require('./TaskAgentApi');
 import taskm = require('./TaskApi');
 import testm = require('./TestApi');
+import testplanm = require('./TestPlanApi')
+import testresultsm = require('./TestResultsApi');
 import tfvcm = require('./TfvcApi');
 import wikim = require('./WikiApi');
 import workm = require('./WorkApi');
@@ -191,6 +195,13 @@ export class WebApi {
      * Each factory method can take a serverUrl and a list of handlers
      * if these aren't provided, the default url and auth handler given to the constructor for this class will be used
      */
+
+    public async getAlertApi(serverUrl?: string, handlers?: VsoBaseInterfaces.IRequestHandler[]): Promise<alertm.IAlertApi> {
+        serverUrl = await this._getResourceAreaUrl(serverUrl || this.serverUrl, "0f2ca920-f269-4545-b1f4-5b4173aa784e");
+        handlers = handlers || [this.authHandler];
+        return new alertm.AlertApi(serverUrl, handlers, this.options);
+    }
+
     public async getBuildApi(serverUrl?: string, handlers?: VsoBaseInterfaces.IRequestHandler[]): Promise<buildm.IBuildApi> {
         serverUrl = await this._getResourceAreaUrl(serverUrl || this.serverUrl, buildm.BuildApi.RESOURCE_AREA_ID);
         handlers = handlers || [this.authHandler];
@@ -254,6 +265,12 @@ export class WebApi {
         return new locationsm.LocationsApi(serverUrl, handlers, optionsClone);
     }
 
+    public async getManagementApi(serverUrl?: string, handlers?: VsoBaseInterfaces.IRequestHandler[]): Promise<managementm.IManagementApi> {
+        serverUrl = await this._getResourceAreaUrl(serverUrl || this.serverUrl, "f101720c-9790-45a6-9fb3-494a09fddeeb");
+        handlers = handlers || [this.authHandler];
+        return new managementm.ManagementApi(serverUrl, handlers, this.options);
+    }
+
     public async getNotificationApi(serverUrl?: string, handlers?: VsoBaseInterfaces.IRequestHandler[]): Promise<notificationm.INotificationApi> {
         // TODO: Load RESOURCE_AREA_ID correctly.
         serverUrl = await this._getResourceAreaUrl(serverUrl || this.serverUrl, "");
@@ -315,6 +332,20 @@ export class WebApi {
         serverUrl = await this._getResourceAreaUrl(serverUrl || this.serverUrl, "c2aa639c-3ccc-4740-b3b6-ce2a1e1d984e");
         handlers = handlers || [this.authHandler];
         return new testm.TestApi(serverUrl, handlers, this.options);
+    }
+
+    public async getTestPlanApi(serverUrl?: string, handlers?: VsoBaseInterfaces.IRequestHandler[]): Promise<testplanm.ITestPlanApi> {
+        // TODO: Load RESOURCE_AREA_ID correctly.
+        serverUrl = await this._getResourceAreaUrl(serverUrl || this.serverUrl, "e4c27205-9d23-4c98-b958-d798bc3f9cd4");
+        handlers = handlers || [this.authHandler];
+        return new testplanm.TestPlanApi(serverUrl, handlers, this.options);
+    }
+
+    public async getTestResultsApi(serverUrl?: string, handlers?: VsoBaseInterfaces.IRequestHandler[]): Promise<testresultsm.ITestResultsApi> {
+        // TODO: Load RESOURCE_AREA_ID correctly.
+        serverUrl = await this._getResourceAreaUrl(serverUrl || this.serverUrl, "c83eaf52-edf3-4034-ae11-17d38f25404c");
+        handlers = handlers || [this.authHandler];
+        return new testresultsm.TestResultsApi(serverUrl, handlers, this.options);
     }
 
     public async getTfvcApi(serverUrl?: string, handlers?: VsoBaseInterfaces.IRequestHandler[]): Promise<tfvcm.ITfvcApi> {
@@ -414,7 +445,7 @@ export class WebApi {
     }
 
     private _readTaskLibSecrets(lookupKey: string): string {
-        if(isBrowser) {
+        if (isBrowser) {
             throw new Error("Browsers can't securely keep secrets");
         }
         // the lookupKey should has following format
