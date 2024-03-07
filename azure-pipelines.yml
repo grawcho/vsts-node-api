@@ -26,15 +26,16 @@ extends:
       - job: job
         strategy:
           matrix:
-            'Node 12':
-              versionSpec: '12.x'
-              npmVersion: '6'
             'Node 14':
               versionSpec: '14.x'
               npmVersion: '6'
             'Node 16':
               versionSpec: '16.x'
               npmVersion: '8'
+            'Node 20':
+              versionSpec: '20.x'
+              npmVersion: '10'
+
         steps:
         - task: NodeTool@0
           inputs:
