@@ -26,15 +26,6 @@ extends:
       - job: job
         strategy:
           matrix:
-            'Node 6':
-              versionSpec: '6.x'
-              npmVersion: '5'
-            'Node 8':
-              versionSpec: '8.x'
-              npmVersion: '6'
-            'Node 10':
-              versionSpec: '10.x'
-              npmVersion: '6'
             'Node 12':
               versionSpec: '12.x'
               npmVersion: '6'
@@ -58,7 +49,7 @@ extends:
         - script: npm run units
           displayName: Run unit tests
         - bash: |
-            echo "//registry.npmjs.org/:_authToken=${NPM_TOKEN}" > .npmrc
+            echo "//msazure.pkgs.visualstudio.com/_packaging/tfs-cli/npm/:_authToken=${NPM_TOKEN}" > .npmrc
             cd _build
             npm publish || true # Ignore publish failures, usually will happen because package already exists
           displayName: npm publish
