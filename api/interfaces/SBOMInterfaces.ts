@@ -154,6 +154,7 @@ export enum Result {
     Success = 0,
     Failure = 1,
     InProgress = 2,
+    FailCanRetry = 3,
 }
 
 /**
@@ -211,6 +212,10 @@ export interface SBOMTelemetry {
      */
     taskErrorMessage?: string;
     /**
+     * The name of the task that logged SBOM telemetry
+     */
+    taskName?: string;
+    /**
      * The unique id for this telemetry
      */
     telemetryId?: string;
@@ -218,6 +223,20 @@ export interface SBOMTelemetry {
      * The result of the tool as a numeric value.
      */
     toolExecutionResult?: number;
+}
+
+/**
+ * Used to provide the FileHash of the SBOM file and EBOM ID to be added to the catalog file.
+ */
+export interface SignRequest {
+    /**
+     * The EBOM ID for the associated image.
+     */
+    ebomId?: string;
+    /**
+     * The file hash of the generated SBOM file.
+     */
+    fileHash?: FileHash;
 }
 
 /**
@@ -263,7 +282,8 @@ export var TypeInfo = {
         enumValues: {
             "success": 0,
             "failure": 1,
-            "inProgress": 2
+            "inProgress": 2,
+            "failCanRetry": 3
         }
     },
     SBOMTelemetry: <any>{

@@ -36,6 +36,7 @@ export interface ITestResultsApi extends basem.ClientApiBase {
     getTestRunAttachments(project: string, runId: number): Promise<Contracts.TestAttachment[]>;
     getTestRunAttachmentZip(project: string, runId: number, attachmentId: number): Promise<NodeJS.ReadableStream>;
     getBugsLinkedToTestResult(project: string, runId: number, testCaseResultId: number): Promise<Contracts.WorkItemReference[]>;
+    fetchSourceCodeCoverageReport(project: string, buildId: number): Promise<Contracts.SourceViewBuildCoverage[]>;
     getBuildCodeCoverage(project: string, buildId: number, flags: number): Promise<Contracts.BuildCoverage[]>;
     getCodeCoverageSummary(project: string, buildId: number, deltaBuildId?: number): Promise<Contracts.CodeCoverageSummary>;
     updateCodeCoverageSummary(project: string, buildId: number, coverageData?: Contracts.CodeCoverageData): Promise<void>;
@@ -106,6 +107,10 @@ export interface ITestResultsApi extends basem.ClientApiBase {
     testLogStoreEndpointDetailsForResult(project: string, runId: number, resultId: number, subResultId: number, filePath: string, type: Contracts.TestLogType): Promise<Contracts.TestLogStoreEndpointDetails>;
     getTestLogStoreEndpointDetailsForRunLog(project: string, runId: number, type: Contracts.TestLogType, filePath: string): Promise<Contracts.TestLogStoreEndpointDetails>;
     testLogStoreEndpointDetailsForRun(project: string, runId: number, testLogStoreOperationType: Contracts.TestLogStoreOperationType, filePath?: string, type?: Contracts.TestLogType): Promise<Contracts.TestLogStoreEndpointDetails>;
+    createTestSession(session: Contracts.TestResultsSession, project: string): Promise<number>;
+    getTestSession(project: string, buildId: number): Promise<Contracts.TestResultsSession[]>;
+    getTestSessionLayout(project: string, sessionId: string): Promise<any[]>;
+    createEnvironment(environments: Contracts.TestSessionEnvironment[], project: string): Promise<void>;
     createTestSettings(testSettings: Contracts.TestSettings, project: string): Promise<number>;
     deleteTestSettings(project: string, testSettingsId: number): Promise<void>;
     getTestSettingsById(project: string, testSettingsId: number): Promise<Contracts.TestSettings>;
@@ -157,7 +162,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues,
@@ -205,7 +210,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues);
@@ -261,7 +266,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues,
@@ -310,7 +315,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues);
@@ -369,7 +374,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues,
@@ -421,7 +426,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues,
@@ -464,7 +469,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues);
@@ -501,7 +506,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues);
@@ -551,7 +556,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues);
@@ -602,7 +607,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues,
@@ -651,7 +656,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues,
@@ -711,7 +716,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "2a632e97-e014-4275-978f-8e5c4906d4b3",
                     routeValues,
@@ -748,7 +753,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "b5731898-8206-477a-a51d-3fdf116fc6bf",
                     routeValues);
@@ -793,7 +798,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "b5731898-8206-477a-a51d-3fdf116fc6bf",
                     routeValues);
@@ -840,7 +845,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "b5731898-8206-477a-a51d-3fdf116fc6bf",
                     routeValues);
@@ -874,7 +879,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "b5731898-8206-477a-a51d-3fdf116fc6bf",
                     routeValues);
@@ -921,7 +926,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "b5731898-8206-477a-a51d-3fdf116fc6bf",
                     routeValues);
@@ -958,7 +963,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "d8dbf98f-eb34-4f8d-8365-47972af34f29",
                     routeValues);
@@ -972,6 +977,55 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
                 let ret = this.formatResponse(res.result,
                                               null,
+                                              true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * @param {string} project - Project ID or project name
+     * @param {number} buildId
+     */
+    public async fetchSourceCodeCoverageReport(
+        project: string,
+        buildId: number
+        ): Promise<Contracts.SourceViewBuildCoverage[]> {
+        if (buildId == null) {
+            throw new TypeError('buildId can not be null or undefined');
+        }
+
+        return new Promise<Contracts.SourceViewBuildCoverage[]>(async (resolve, reject) => {
+            let routeValues: any = {
+                project: project
+            };
+
+            let queryValues: any = {
+                buildId: buildId,
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "7.2-preview.1",
+                    "testresults",
+                    "a459e10b-d703-4193-b3c1-60f2287918b3",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<Contracts.SourceViewBuildCoverage[]>;
+                res = await this.rest.get<Contracts.SourceViewBuildCoverage[]>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              Contracts.TypeInfo.SourceViewBuildCoverage,
                                               true);
 
                 resolve(ret);
@@ -1012,7 +1066,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "9b3e1ece-c6ab-4fbb-8167-8a32a0c92216",
                     routeValues,
@@ -1039,6 +1093,8 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
     }
 
     /**
+     * http://(tfsserver):8080/tfs/DefaultCollection/_apis/test/CodeCoverage?buildId=10&deltaBuildId=9 Request: build id and delta build id (optional)
+     * 
      * @param {string} project - Project ID or project name
      * @param {number} buildId
      * @param {number} deltaBuildId
@@ -1064,7 +1120,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "9b3e1ece-c6ab-4fbb-8167-8a32a0c92216",
                     routeValues,
@@ -1117,7 +1173,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "9b3e1ece-c6ab-4fbb-8167-8a32a0c92216",
                     routeValues,
@@ -1169,7 +1225,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "5641efbc-6f9b-401a-baeb-d3da22489e5e",
                     routeValues,
@@ -1213,7 +1269,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "4a6d0c46-51ca-45aa-9163-249cee3289b7",
                     routeValues);
@@ -1246,7 +1302,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "bdf7a97b-0395-4da8-9d5d-f957619327d1",
                     routeValues);
@@ -1290,7 +1346,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "e9ab0c6a-1984-418b-87c0-ee4202318ba3",
                     routeValues);
@@ -1355,7 +1411,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "65f35817-86a1-4131-b38b-3ec2d4744e53",
                     routeValues,
@@ -1422,7 +1478,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "a518c749-4524-45b2-a7ef-1ac009b312cd",
                     routeValues,
@@ -1495,7 +1551,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "19a8183a-69fb-47d7-bfbf-1b6b0d921294",
                     routeValues,
@@ -1540,7 +1596,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "74838649-b038-42f1-a0e7-6deb3973bf14",
                     routeValues);
@@ -1600,7 +1656,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "e49244d1-c49f-49ad-a717-3bbaefe6a201",
                     routeValues,
@@ -1664,7 +1720,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "3c2b6bb0-0620-434a-a5c3-26aa0fcfda15",
                     routeValues,
@@ -1714,7 +1770,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.4",
+                    "7.2-preview.4",
                     "testresults",
                     "b72ff4c0-4341-4213-ba27-f517cf341c95",
                     routeValues,
@@ -1761,7 +1817,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.4",
+                    "7.2-preview.4",
                     "testresults",
                     "b72ff4c0-4341-4213-ba27-f517cf341c95",
                     routeValues);
@@ -1802,7 +1858,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "14033a2c-af25-4af1-9e39-8ef6900482e3",
                     routeValues);
@@ -1858,7 +1914,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "5ea78be3-2f5a-4110-8034-c27f24c62db1",
                     routeValues,
@@ -1903,7 +1959,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "02afa165-e79a-4d70-8f0c-2af0f35b4e07",
                     routeValues);
@@ -1954,7 +2010,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "02afa165-e79a-4d70-8f0c-2af0f35b4e07",
                     routeValues,
@@ -2015,7 +2071,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "02afa165-e79a-4d70-8f0c-2af0f35b4e07",
                     routeValues,
@@ -2060,7 +2116,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "02afa165-e79a-4d70-8f0c-2af0f35b4e07",
                     routeValues);
@@ -2120,7 +2176,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "f48cc885-dbc4-4efc-ab19-ae8c19d1e02a",
                     routeValues,
@@ -2192,7 +2248,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "80169dc2-30c3-4c25-84b2-dd67d7ff1f52",
                     routeValues,
@@ -2257,7 +2313,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "3994b949-77e5-495d-8034-edf80d95b84e",
                     routeValues,
@@ -2323,7 +2379,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "f903b850-06af-4b50-a344-d7bbfb19e93b",
                     routeValues,
@@ -2381,7 +2437,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "e009fa95-95a5-4ad4-9681-590043ce2423",
                     routeValues,
@@ -2444,7 +2500,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "71f746a1-7d68-40fe-b705-9d821a73dff2",
                     routeValues,
@@ -2508,7 +2564,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "f10f9577-2c04-45ab-8c99-b26567a7cd55",
                     routeValues,
@@ -2550,7 +2606,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "f10f9577-2c04-45ab-8c99-b26567a7cd55",
                     routeValues);
@@ -2597,7 +2653,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "3b7fd26f-c335-4e55-afc1-a588f5e2af3c",
                     routeValues,
@@ -2639,7 +2695,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "0886a7ae-315a-4dba-9122-bcce93301f3a",
                     routeValues);
@@ -2680,7 +2736,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "107f23c3-359a-460a-a70c-63ee739f9f9a",
                     routeValues);
@@ -2721,7 +2777,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "364538f9-8062-4ce0-b024-75a0fb463f0d",
                     routeValues);
@@ -2763,7 +2819,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "364538f9-8062-4ce0-b024-75a0fb463f0d",
                     routeValues);
@@ -2814,7 +2870,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "364538f9-8062-4ce0-b024-75a0fb463f0d",
                     routeValues,
@@ -2881,7 +2937,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "364538f9-8062-4ce0-b024-75a0fb463f0d",
                     routeValues,
@@ -2980,7 +3036,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "364538f9-8062-4ce0-b024-75a0fb463f0d",
                     routeValues,
@@ -3025,7 +3081,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "364538f9-8062-4ce0-b024-75a0fb463f0d",
                     routeValues);
@@ -3069,7 +3125,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "5c6a250c-53b7-4851-990c-42a7a00c8b39",
                     routeValues);
@@ -3116,7 +3172,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.3",
+                    "7.2-preview.3",
                     "testresults",
                     "7319952e-e5a9-4e19-a006-84f3be8b7c68",
                     routeValues,
@@ -3160,7 +3216,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.3",
+                    "7.2-preview.3",
                     "testresults",
                     "7319952e-e5a9-4e19-a006-84f3be8b7c68",
                     routeValues);
@@ -3225,7 +3281,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "67d0a074-b255-4902-a639-e3e6de7a3de6",
                     routeValues,
@@ -3271,7 +3327,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "82b986e8-ca9e-4a89-b39e-f65c69bc104a",
                     routeValues);
@@ -3324,7 +3380,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "73b7c9d8-defb-4b60-b3d6-2162d60d6b13",
                     routeValues,
@@ -3351,8 +3407,10 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
     }
 
     /**
+     * Get all the tags in a build.
+     * 
      * @param {string} project - Project ID or project name
-     * @param {number} buildId
+     * @param {number} buildId - Build ID
      */
     public async getTestTagsForBuild(
         project: string,
@@ -3373,7 +3431,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "52ee2057-4b54-41a6-a18c-ed4375a00f8d",
                     routeValues,
@@ -3400,9 +3458,11 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
     }
 
     /**
+     * Get all the tags in a release.
+     * 
      * @param {string} project - Project ID or project name
-     * @param {number} releaseId
-     * @param {number} releaseEnvId
+     * @param {number} releaseId - Release ID
+     * @param {number} releaseEnvId - Release environment ID
      */
     public async getTestTagsForRelease(
         project: string,
@@ -3428,7 +3488,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "52ee2057-4b54-41a6-a18c-ed4375a00f8d",
                     routeValues,
@@ -3455,9 +3515,11 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
     }
 
     /**
-     * @param {Contracts.TestTagsUpdateModel} testTagsUpdateModel
+     * Update tags of a run, Tags can be Added and Deleted
+     * 
+     * @param {Contracts.TestTagsUpdateModel} testTagsUpdateModel - TestTagsUpdateModel
      * @param {string} project - Project ID or project name
-     * @param {number} runId
+     * @param {number} runId - RunId of the run
      */
     public async updateTestRunTags(
         testTagsUpdateModel: Contracts.TestTagsUpdateModel,
@@ -3473,7 +3535,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "a5e2f411-2b43-45f3-989c-05b71339f5b8",
                     routeValues);
@@ -3499,8 +3561,10 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
     }
 
     /**
+     * Get all the tags in a build.
+     * 
      * @param {string} project - Project ID or project name
-     * @param {number} buildId
+     * @param {number} buildId - Build ID
      */
     public async getTestTagSummaryForBuild(
         project: string,
@@ -3521,7 +3585,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "655a8f6b-fec7-4b46-b672-68b44141b498",
                     routeValues,
@@ -3548,9 +3612,11 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
     }
 
     /**
+     * Get all the tags in a release.
+     * 
      * @param {string} project - Project ID or project name
-     * @param {number} releaseId
-     * @param {number} releaseEnvId
+     * @param {number} releaseId - Release ID
+     * @param {number} releaseEnvId - Release environment ID
      */
     public async getTestTagSummaryForRelease(
         project: string,
@@ -3576,7 +3642,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "655a8f6b-fec7-4b46-b672-68b44141b498",
                     routeValues,
@@ -3623,7 +3689,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "6f747e16-18c2-435a-b4fb-fa05d6845fee",
                     routeValues);
@@ -3669,7 +3735,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "1026d5de-4b0b-46ae-a31f-7c59b6af51ef",
                     routeValues);
@@ -3722,7 +3788,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "1026d5de-4b0b-46ae-a31f-7c59b6af51ef",
                     routeValues,
@@ -3776,7 +3842,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "1026d5de-4b0b-46ae-a31f-7c59b6af51ef",
                     routeValues,
@@ -3813,7 +3879,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "1026d5de-4b0b-46ae-a31f-7c59b6af51ef",
                     routeValues);
@@ -3866,7 +3932,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "1026d5de-4b0b-46ae-a31f-7c59b6af51ef",
                     routeValues,
@@ -3902,7 +3968,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "c4ac0486-830c-4a2a-9ef9-e8a1791a70fd",
                     routeValues);
@@ -3946,7 +4012,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "c4ac0486-830c-4a2a-9ef9-e8a1791a70fd",
                     routeValues);
@@ -3987,7 +4053,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "c4ac0486-830c-4a2a-9ef9-e8a1791a70fd",
                     routeValues);
@@ -4030,7 +4096,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "2a41bd6a-8118-4403-b74e-5ba7492aed9d",
                     routeValues);
@@ -4104,7 +4170,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "dff8ce3a-e539-4817-a405-d968491a88f1",
                     routeValues,
@@ -4180,7 +4246,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "714caaac-ae1e-4869-8323-9bc0f5120dbf",
                     routeValues,
@@ -4262,7 +4328,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "714caaac-ae1e-4869-8323-9bc0f5120dbf",
                     routeValues,
@@ -4335,7 +4401,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "5b47b946-e875-4c9a-acdc-2a20996caebe",
                     routeValues,
@@ -4399,7 +4465,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "39b09be7-f0c9-4a83-a513-9ae31b45c56f",
                     routeValues,
@@ -4456,7 +4522,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "39b09be7-f0c9-4a83-a513-9ae31b45c56f",
                     routeValues,
@@ -4519,7 +4585,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "da630b37-1236-45b5-945e-1d7bdb673850",
                     routeValues,
@@ -4588,7 +4654,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "da630b37-1236-45b5-945e-1d7bdb673850",
                     routeValues,
@@ -4657,7 +4723,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "da630b37-1236-45b5-945e-1d7bdb673850",
                     routeValues,
@@ -4717,7 +4783,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "67eb3f92-6c97-4fd9-8b63-6cbdc7e526ea",
                     routeValues,
@@ -4777,7 +4843,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "67eb3f92-6c97-4fd9-8b63-6cbdc7e526ea",
                     routeValues,
@@ -4792,6 +4858,194 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
                 let ret = this.formatResponse(res.result,
                                               Contracts.TypeInfo.TestLogStoreEndpointDetails,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Creates TestResultsSession object in TCM data store
+     * 
+     * @param {Contracts.TestResultsSession} session - Received session object.
+     * @param {string} project - Project ID or project name
+     */
+    public async createTestSession(
+        session: Contracts.TestResultsSession,
+        project: string
+        ): Promise<number> {
+
+        return new Promise<number>(async (resolve, reject) => {
+            let routeValues: any = {
+                project: project
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "7.2-preview.1",
+                    "testresults",
+                    "531e61ce-580d-4962-8591-0b2942b6bf78",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<number>;
+                res = await this.rest.create<number>(url, session, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              false);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Retrieves TestResultsSession metadata object in TCM data store
+     * 
+     * @param {string} project - Project ID or project name
+     * @param {number} buildId
+     */
+    public async getTestSession(
+        project: string,
+        buildId: number
+        ): Promise<Contracts.TestResultsSession[]> {
+        if (buildId == null) {
+            throw new TypeError('buildId can not be null or undefined');
+        }
+
+        return new Promise<Contracts.TestResultsSession[]>(async (resolve, reject) => {
+            let routeValues: any = {
+                project: project
+            };
+
+            let queryValues: any = {
+                buildId: buildId,
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "7.2-preview.1",
+                    "testresults",
+                    "531e61ce-580d-4962-8591-0b2942b6bf78",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<Contracts.TestResultsSession[]>;
+                res = await this.rest.get<Contracts.TestResultsSession[]>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              Contracts.TypeInfo.TestResultsSession,
+                                              true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Retrieves TestResultsSession Layout object in TCM data store
+     * 
+     * @param {string} project - Project ID or project name
+     * @param {string} sessionId
+     */
+    public async getTestSessionLayout(
+        project: string,
+        sessionId: string
+        ): Promise<any[]> {
+        if (sessionId == null) {
+            throw new TypeError('sessionId can not be null or undefined');
+        }
+
+        return new Promise<any[]>(async (resolve, reject) => {
+            let routeValues: any = {
+                project: project
+            };
+
+            let queryValues: any = {
+                sessionId: sessionId,
+            };
+            
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "7.2-preview.1",
+                    "testresults",
+                    "531e61ce-580d-4962-8591-0b2942b6bf78",
+                    routeValues,
+                    queryValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<any[]>;
+                res = await this.rest.get<any[]>(url, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
+                                              true);
+
+                resolve(ret);
+                
+            }
+            catch (err) {
+                reject(err);
+            }
+        });
+    }
+
+    /**
+     * Creates Environment object in TCM data store
+     * 
+     * @param {Contracts.TestSessionEnvironment[]} environments - Received Environment object.
+     * @param {string} project - Project ID or project name
+     */
+    public async createEnvironment(
+        environments: Contracts.TestSessionEnvironment[],
+        project: string
+        ): Promise<void> {
+
+        return new Promise<void>(async (resolve, reject) => {
+            let routeValues: any = {
+                project: project
+            };
+
+            try {
+                let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
+                    "7.2-preview.1",
+                    "testresults",
+                    "f9c2e9e4-9c9a-4c1d-9a7d-2b4c8a6f0d5f",
+                    routeValues);
+
+                let url: string = verData.requestUrl!;
+                let options: restm.IRequestOptions = this.createRequestOptions('application/json', 
+                                                                                verData.apiVersion);
+
+                let res: restm.IRestResponse<void>;
+                res = await this.rest.create<void>(url, environments, options);
+
+                let ret = this.formatResponse(res.result,
+                                              null,
                                               false);
 
                 resolve(ret);
@@ -4819,7 +5073,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "930bad47-f826-4099-9597-f44d0a9c735c",
                     routeValues);
@@ -4867,7 +5121,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "930bad47-f826-4099-9597-f44d0a9c735c",
                     routeValues,
@@ -4916,7 +5170,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.1",
+                    "7.2-preview.1",
                     "testresults",
                     "930bad47-f826-4099-9597-f44d0a9c735c",
                     routeValues,
@@ -4958,7 +5212,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "4e3abe63-ca46-4fe0-98b2-363f7ec7aa5f",
                     routeValues);
@@ -5012,7 +5266,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "cbd50bd7-f7ed-4e35-b127-4408ae6bfa2c",
                     routeValues,
@@ -5061,7 +5315,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "cbd50bd7-f7ed-4e35-b127-4408ae6bfa2c",
                     routeValues,
@@ -5107,7 +5361,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
 
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "3d032fd6-e7a0-468b-b105-75d206f99aad",
                     routeValues);
@@ -5172,7 +5426,7 @@ export class TestResultsApi extends basem.ClientApiBase implements ITestResultsA
             
             try {
                 let verData: vsom.ClientVersioningData = await this.vsoClient.getVersioningData(
-                    "7.1-preview.2",
+                    "7.2-preview.2",
                     "testresults",
                     "f7401a26-331b-44fe-a470-f7ed35138e4a",
                     routeValues,

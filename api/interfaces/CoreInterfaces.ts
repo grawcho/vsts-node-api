@@ -14,6 +14,17 @@ import IdentitiesInterfaces = require("../interfaces/IdentitiesInterfaces");
 import VSSInterfaces = require("../interfaces/common/VSSInterfaces");
 
 
+export interface CategorizedWebApiTeams {
+    /**
+     * Teams that the user is a member of.
+     */
+    myTeams?: WebApiTeam[];
+    /**
+     * Teams that the user can read but is not member of.
+     */
+    otherReadableTeams?: WebApiTeam[];
+}
+
 export enum ConnectedServiceKind {
     /**
      * Custom or unknown service
@@ -301,6 +312,10 @@ export interface TeamProjectCollection extends TeamProjectCollectionReference {
  */
 export interface TeamProjectCollectionReference {
     /**
+     * Collection avatar Url.
+     */
+    avatarUrl?: string;
+    /**
      * Collection Id.
      */
     id?: string;
@@ -364,8 +379,17 @@ export interface TeamProjectReference {
  * A data transfer object that stores the metadata associated with the creation of temporary data.
  */
 export interface TemporaryDataCreatedDTO extends TemporaryDataDTO {
+    /**
+     * Temporary data expiration date.
+     */
     expirationDate?: Date;
+    /**
+     * Temporary data id.
+     */
     id?: string;
+    /**
+     * Rest url for the temporary data.
+     */
     url?: string;
 }
 
@@ -373,8 +397,17 @@ export interface TemporaryDataCreatedDTO extends TemporaryDataDTO {
  * A data transfer object that stores the metadata associated with the temporary data.
  */
 export interface TemporaryDataDTO {
+    /**
+     * Temporary data expire in seconds
+     */
     expirationSeconds?: number;
+    /**
+     * Temporary data origin
+     */
     origin?: string;
+    /**
+     * Temporary data.
+     */
     value?: any;
 }
 
