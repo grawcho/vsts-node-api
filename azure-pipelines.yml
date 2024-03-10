@@ -11,11 +11,11 @@ extends:
   parameters:
     sdl:
       sourceAnalysisPool:
-        name: Azure-Pipelines-1ESPT-ExDShared
+        name: Hosted
         image: windows-2022
         os: windows
     pool:
-      name: Azure-Pipelines-1ESPT-ExDShared
+      name: Hosted
       image: ubuntu-latest
       os: linux
     customBuildTags:
@@ -26,12 +26,6 @@ extends:
       - job: job
         strategy:
           matrix:
-            'Node 14':
-              versionSpec: '14.x'
-              npmVersion: '6'
-            'Node 16':
-              versionSpec: '16.x'
-              npmVersion: '8'
             'Node 20':
               versionSpec: '20.x'
               npmVersion: '10'
