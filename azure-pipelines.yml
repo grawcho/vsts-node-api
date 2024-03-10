@@ -11,11 +11,11 @@ extends:
   parameters:
     sdl:
       sourceAnalysisPool:
-        name: OneBranch
+        name: Azure-Pipelines-1ESPT-ExDShared
         image: windows-2022
         os: windows
     pool:
-      name: OneBranch
+      name: Azure-Pipelines-1ESPT-ExDShared
       image: ubuntu-latest
       os: linux
     customBuildTags:
