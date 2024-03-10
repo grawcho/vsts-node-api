@@ -11,11 +11,11 @@ extends:
   parameters:
     sdl:
       sourceAnalysisPool:
-        name: Hosted
+        name: OneBranch
         image: windows-2022
         os: windows
     pool:
-      name: Hosted
+      name: OneBranch
       image: ubuntu-latest
       os: linux
     customBuildTags:
