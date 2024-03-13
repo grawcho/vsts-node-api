@@ -49,6 +49,6 @@ extends:
           inputs:
             command: publish
             workingDir: '_build'
-        #    publishRegistry: useExternalRegistry
-        #    publishEndpoint: btt-npm-publish-token
+            publishRegistry: useFeed
+            publishFeed: tfs-cli
           continueOnError: true
