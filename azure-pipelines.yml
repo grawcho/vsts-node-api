@@ -43,12 +43,12 @@ extends:
           displayName: npm run build
         - script: npm run units
           displayName: Run unit tests
-        - bash: |
-            #echo "//msazure.pkgs.visualstudio.com/_packaging/tfs-cli/npm/:_authToken=${NPM_TOKEN}" > .npmrc
-            cd _build
-            npm config set registry https://msazure.pkgs.visualstudio.com/_packaging/tfs-cli/npm/registry/
-            npm publish || true # Ignore publish failures, usually will happen because package already exists
-          displayName: npm publish
+        - task: Npm@1
+          displayName: Publish azure-devops-node-api to kusto npm
           condition: and(succeeded(), in(variables['build.reason'], 'IndividualCI', 'BatchedCI', 'Manual'), eq(variables['build.sourcebranchname'], 'master'))
-          env:
-            NPM_TOKEN: $(npmPublishToken)
+          inputs:
+            command: publish
+            workingDir: '_build'
+        #    publishRegistry: useExternalRegistry
+        #    publishEndpoint: btt-npm-publish-token
+          continueOnError: true
