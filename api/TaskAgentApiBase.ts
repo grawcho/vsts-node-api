@@ -164,7 +164,7 @@ export interface ITaskAgentApiBase extends basem.ClientApiBase {
     updateVariableGroup(variableGroupParameters: TaskAgentInterfaces.VariableGroupParameters, groupId: number): Promise<TaskAgentInterfaces.VariableGroup>;
     getVariableGroup(project: string, groupId: number): Promise<TaskAgentInterfaces.VariableGroup>;
     getVariableGroups(project: string, groupName?: string, actionFilter?: TaskAgentInterfaces.VariableGroupActionFilter, top?: number, continuationToken?: number, queryOrder?: TaskAgentInterfaces.VariableGroupQueryOrder): Promise<TaskAgentInterfaces.VariableGroup[]>;
-    getVariableGroupsById(project: string, groupIds: number[]): Promise<TaskAgentInterfaces.VariableGroup[]>;
+    getVariableGroupsById(project: string, groupIds: number[], loadSecrets?: boolean): Promise<TaskAgentInterfaces.VariableGroup[]>;
     addVirtualMachineGroup(createParameters: TaskAgentInterfaces.VirtualMachineGroupCreateParameters, project: string, environmentId: number): Promise<TaskAgentInterfaces.VirtualMachineGroup>;
     deleteVirtualMachineGroup(project: string, environmentId: number, resourceId: number): Promise<void>;
     getVirtualMachineGroup(project: string, environmentId: number, resourceId: number): Promise<TaskAgentInterfaces.VirtualMachineGroup>;
@@ -177,8 +177,8 @@ export interface ITaskAgentApiBase extends basem.ClientApiBase {
 }
 
 export class TaskAgentApiBase extends basem.ClientApiBase implements ITaskAgentApiBase {
-    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions) {
-        super(baseUrl, handlers, 'node-TaskAgent-api', options);
+    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions, userAgent?: string) {
+        super(baseUrl, handlers, userAgent || 'node-TaskAgent-api', options);
     }
 
     public static readonly RESOURCE_AREA_ID = "a85b8835-c1a1-4aac-ae97-1c3d0ba72dbd";
@@ -6567,14 +6567,17 @@ export class TaskAgentApiBase extends basem.ClientApiBase implements ITaskAgentA
         visibility?: string[],
         scopeLocal?: boolean
         ): Promise<NodeJS.ReadableStream> {
+        if (versionString == null) {
+            throw new TypeError('versionString can not be null or undefined');
+        }
 
         return new Promise<NodeJS.ReadableStream>(async (resolve, reject) => {
             let routeValues: any = {
-                taskId: taskId,
-                versionString: versionString
+                taskId: taskId
             };
 
             let queryValues: any = {
+                versionString: versionString,
                 visibility: visibility,
                 scopeLocal: scopeLocal,
             };
@@ -6611,14 +6614,17 @@ export class TaskAgentApiBase extends basem.ClientApiBase implements ITaskAgentA
         visibility?: string[],
         scopeLocal?: boolean
         ): Promise<TaskAgentInterfaces.TaskDefinition> {
+        if (versionString == null) {
+            throw new TypeError('versionString can not be null or undefined');
+        }
 
         return new Promise<TaskAgentInterfaces.TaskDefinition>(async (resolve, reject) => {
             let routeValues: any = {
-                taskId: taskId,
-                versionString: versionString
+                taskId: taskId
             };
 
             let queryValues: any = {
+                versionString: versionString,
                 visibility: visibility,
                 scopeLocal: scopeLocal,
             };
@@ -7092,10 +7098,12 @@ export class TaskAgentApiBase extends basem.ClientApiBase implements ITaskAgentA
      * 
      * @param {string} project - Project ID or project name
      * @param {number[]} groupIds - Comma separated list of Ids of variable groups.
+     * @param {boolean} loadSecrets - Flag indicating if the secrets within variable groups should be loaded.
      */
     public async getVariableGroupsById(
         project: string,
-        groupIds: number[]
+        groupIds: number[],
+        loadSecrets?: boolean
         ): Promise<TaskAgentInterfaces.VariableGroup[]> {
         if (groupIds == null) {
             throw new TypeError('groupIds can not be null or undefined');
@@ -7108,6 +7116,7 @@ export class TaskAgentApiBase extends basem.ClientApiBase implements ITaskAgentA
 
             let queryValues: any = {
                 groupIds: groupIds && groupIds.join(","),
+                loadSecrets: loadSecrets,
             };
             
             try {

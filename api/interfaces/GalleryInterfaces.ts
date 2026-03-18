@@ -850,22 +850,13 @@ export enum ExtensionQueryFlags {
      */
     IncludeNameConflictInfo = 32768,
     /**
+     * When retrieving versions from a query, return the details with both latest prelease and stable version of the extensions that matched, if not prelease version, only return stable version. This is useful when the caller doesn't need all the published versions. It will save a significant size in the returned payload.
+     */
+    IncludeLatestPrereleaseAndStableVersionOnly = 65536,
+    /**
      * AllAttributes is designed to be a mask that defines all sub-elements of the extension should be returned.  NOTE: This is not actually All flags. This is now locked to the set defined since changing this enum would be a breaking change and would change the behavior of anyone using it. Try not to use this value when making calls to the service, instead be explicit about the options required.
      */
     AllAttributes = 16863,
-    /**
-     * Excluding unpublished extensions from acquisition flow. The flag indicates whether an extension is unpublished or locked.
-     */
-    ExcludeUnpublished1 = 4356,
-    ExcludeUnpublished2 = 4372,
-    ExcludeUnpublished3 = 6404,
-    ExcludeUnpublished4 = 6420,
-    ExcludeUnpublished5 = 8196,
-    ExcludeUnpublished6 = 20740,
-    ExcludeUnpublished7 = 20756,
-    ExcludeUnpublished8 = 22788,
-    ExcludeUnpublished9 = 22804,
-    ExcludeUnpublished10 = 37124,
 }
 
 /**
@@ -935,9 +926,13 @@ export enum ExtensionVersionFlags {
      */
     None = 0,
     /**
-     * The Validated flag for a version means the extension version has passed validation and can be used..
+     * The Validated flag for a version means the extension version has passed validation and can be used.
      */
     Validated = 1,
+    /**
+     * The Prerelease flag for a version means the extension version is prerelease. This flag is runtime only. We need backfill this flag to database in the future, here is a tracking task: https://dev.azure.com/mseng/AzureDevOps/_workitems/edit/2234733
+     */
+    Prerelease = 2,
 }
 
 /**
@@ -2153,17 +2148,8 @@ export var TypeInfo = {
             "includeLcids": 8192,
             "includeSharedOrganizations": 16384,
             "includeNameConflictInfo": 32768,
-            "allAttributes": 16863,
-            "excludeUnpublished1": 4356,
-            "excludeUnpublished2": 4372,
-            "excludeUnpublished3": 6404,
-            "excludeUnpublished4": 6420,
-            "excludeUnpublished5": 8196,
-            "excludeUnpublished6": 20740,
-            "excludeUnpublished7": 20756,
-            "excludeUnpublished8": 22788,
-            "excludeUnpublished9": 22804,
-            "excludeUnpublished10": 37124
+            "includeLatestPrereleaseAndStableVersionOnly": 65536,
+            "allAttributes": 16863
         }
     },
     ExtensionQueryResult: <any>{
@@ -2189,7 +2175,8 @@ export var TypeInfo = {
     ExtensionVersionFlags: {
         enumValues: {
             "none": 0,
-            "validated": 1
+            "validated": 1,
+            "prerelease": 2
         }
     },
     NotificationsData: <any>{

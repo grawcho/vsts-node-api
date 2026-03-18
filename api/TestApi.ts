@@ -98,8 +98,8 @@ export interface ITestApi extends basem.ClientApiBase {
 }
 
 export class TestApi extends basem.ClientApiBase implements ITestApi {
-    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions) {
-        super(baseUrl, handlers, 'node-Test-api', options);
+    constructor(baseUrl: string, handlers: VsoBaseInterfaces.IRequestHandler[], options?: VsoBaseInterfaces.IRequestOptions, userAgent?: string) {
+        super(baseUrl, handlers, userAgent || 'node-Test-api', options);
     }
 
     public static readonly RESOURCE_AREA_ID = "c2aa639c-3ccc-4740-b3b6-ce2a1e1d984e";
@@ -3910,7 +3910,7 @@ export class TestApi extends basem.ClientApiBase implements ITestApi {
                 res = await this.rest.create<TestInterfaces.TestToWorkItemLinks>(url, null, options);
 
                 let ret = this.formatResponse(res.result,
-                                              null,
+                                              TestInterfaces.TypeInfo.TestToWorkItemLinks,
                                               false);
 
                 resolve(ret);

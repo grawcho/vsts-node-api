@@ -15,13 +15,21 @@ import VSSInterfaces = require("../interfaces/common/VSSInterfaces");
 
 export interface Alert {
     /**
-     * Identifier for the alert. It is unqiue within Azure DevOps organization.
+     * Additional properties of this alert.
+     */
+    additionalProperties?: { [key: string] : any; };
+    /**
+     * Identifier for the alert. It is unique within Azure DevOps organization.
      */
     alertId?: number;
     /**
      * Type of the alert. E.g. secret, code, etc.
      */
     alertType?: AlertType;
+    /**
+     * Confidence level of the alert.
+     */
+    confidence?: Confidence;
     /**
      * Contains information for the dismissal of the alert if the alert has been dismissed.
      */
@@ -55,6 +63,10 @@ export interface Alert {
      */
     physicalLocations?: PhysicalLocation[];
     /**
+     * Relations between alerts and other artifacts.
+     */
+    relations?: RelationMetadata[];
+    /**
      * Repository URL where the alert was detected.
      */
     repositoryUrl?: string;
@@ -82,6 +94,10 @@ export interface Alert {
      * ValidationFingerprints for the secret liveness check. Only returned on demand in Get API with Expand parameter set to be ValidationFingerprint (not returned in List API)
      */
     validationFingerprints?: ValidationFingerprint[];
+    /**
+     * Validity details of an alert. Currently, this is only applicable to secret alerts. In case of secret alerts, the validity status and time is computed by looking at the liveness results for validation fingerprints associated to an alert.
+     */
+    validityDetails?: AlertValidityInfo;
 }
 
 /**
@@ -114,6 +130,45 @@ export interface AlertAnalysisInstance {
     state?: State;
 }
 
+export enum AlertListExpandOption {
+    /**
+     * No Expands.
+     */
+    None = 0,
+    /**
+     * Return a minimal representation of an alert.
+     */
+    Minimal = 1,
+}
+
+/**
+ * Alert metadata.
+ */
+export interface AlertMetadata {
+    /**
+     * The ID of the alert.
+     */
+    alertId?: number;
+    /**
+     * A list of metadata to be associated with the alert.
+     */
+    metadata?: Metadata[];
+}
+
+/**
+ * Used to represent an update in a relationship between an alert and an artifact.
+ */
+export interface AlertMetadataChange {
+    /**
+     * The ID of the alert.
+     */
+    alertId?: number;
+    /**
+     * The change that occurred to the metadata.
+     */
+    metadataChange?: MetadataChange;
+}
+
 export interface AlertStateUpdate {
     dismissedComment?: string;
     dismissedReason?: DismissalType;
@@ -137,12 +192,70 @@ export enum AlertType {
      * The code contains a weakness determined by static analysis.
      */
     Code = 3,
+    /**
+     * The code uses a dependency with potential license incompliance.
+     */
+    License = 4,
+}
+
+export enum AlertValidationRequestStatus {
+    /**
+     * Default, when the request status is not set/applicable.
+     */
+    None = 0,
+    /**
+     * First validation request for the alert's validation fingerprints, created when the sarif is submitted for processing.
+     */
+    Created = 1,
+    /**
+     * The secret validation jobs for the alert's validation fingerprints have been manually queued and at least one is still in progress.
+     */
+    InProgress = 2,
+    /**
+     * All the secret validation jobs for the alert's validation fingerprints have returned Completed or Failed.
+     */
+    Completed = 3,
+    /**
+     * This status is set only when there is an exception in the ValidationService.
+     */
+    Failed = 4,
+}
+
+/**
+ * Validity data for an alert that will be part of Alerts APIs and UI.
+ */
+export interface AlertValidityInfo {
+    validityLastCheckedDate?: Date;
+    validityStatus?: AlertValidityStatus;
+}
+
+export enum AlertValidityStatus {
+    /**
+     * When there are no validation fingerprints attached to the alert.
+     */
+    None = 0,
+    /**
+     * When the validations for validation fingerprints associated to the alert have not been conclusive.
+     */
+    Unknown = 1,
+    /**
+     * When atleast one validation fingerprint associated to the alert is exploitable.
+     */
+    Active = 2,
+    /**
+     * When all validation fingerprints associated to the alert are not exploitable.
+     */
+    Inactive = 3,
 }
 
 /**
  * AnalysisConfiguration class models a build definition.
  */
 export interface AnalysisConfiguration {
+    /**
+     * The type of alert this configuration is setup to detect.
+     */
+    alertType?: AlertType;
     /**
      * Details for the configuration. Populated values depend on the type of configuration.
      */
@@ -166,6 +279,10 @@ export interface AnalysisConfiguration {
 }
 
 export interface AnalysisConfigurationDetails {
+    /**
+     * Properties of the pipeline.
+     */
+    additionalProperties?: { [key: string] : any; };
     /**
      * Reference to a git object, e.g. branch ref.
      */
@@ -317,6 +434,17 @@ export enum ComponentType {
     Vcpkg = 16,
 }
 
+export enum Confidence {
+    /**
+     * High confidence level for alert
+     */
+    High = 0,
+    /**
+     * Other confidence level for alert
+     */
+    Other = 1,
+}
+
 /**
  * Information about a vulnerable dependency
  */
@@ -337,6 +465,26 @@ export interface Dependency {
      * Unique ID for the dependency
      */
     dependencyId?: number;
+    /**
+     * License information of the Component
+     */
+    license?: License;
+}
+
+export enum DependencyKind {
+    Unknown = 0,
+    /**
+     * The root dependency introduced the component being alerted.
+     */
+    RootDependency = 1,
+    /**
+     * The component being alerted.
+     */
+    Component = 2,
+    /**
+     * Vulnerable Dependency. Deprecating this value. Use Component instead.
+     */
+    VulnerableDependency = 3,
 }
 
 /**
@@ -409,6 +557,14 @@ export enum DismissalType {
      * Dismissal indicating alert is a false positive and will likely not be fixed.
      */
     FalsePositive = 3,
+    /**
+     * Dismissal indicating user is agreeing to follow license guidance.
+     */
+    AgreedToGuidance = 4,
+    /**
+     * Dismissal indicating backend detection tool was upgraded and the alert is not detected by the new version of tool.
+     */
+    ToolUpgrade = 5,
 }
 
 export enum ExpandOption {
@@ -422,12 +578,123 @@ export enum ExpandOption {
     ValidationFingerprint = 1,
 }
 
+/**
+ * Details for a legal review for a given component
+ */
+export interface LegalReview {
+    /**
+     * The review id. This indicates the associated work item id for dev it's witness-dev and for prod it's ossmsft.
+     */
+    id?: number;
+    /**
+     * The review state.
+     */
+    state?: string;
+    /**
+     * The review web url.
+     */
+    webUrl?: string;
+}
+
+/**
+ * License information for dependencies
+ */
+export interface License {
+    /**
+     * License name
+     */
+    name?: string;
+    /**
+     * License state
+     */
+    state?: LicenseState;
+    /**
+     * Url for license information
+     */
+    url?: string;
+}
+
+export enum LicenseState {
+    /**
+     * Information of the license has not been harvested by ClearlyDefined
+     */
+    Unknown = 0,
+    /**
+     * Information of the license has not been harvested by ClearlyDefined
+     */
+    NotHarvested = 1,
+    /**
+     * Information of the license has been harvested by ClearlyDefined
+     */
+    Harvested = 2,
+}
+
 export interface LogicalLocation {
     fullyQualifiedName?: string;
     /**
-     * Possible values: "unknown" "rootDependency" and "vulnerableDependency"
+     * Dependency kind of this logical location.
      */
-    kind?: string;
+    kind?: DependencyKind;
+    /**
+     * License information for Dependency Only applicable when Kind is "Component" and the alertType of the alert with this location is License
+     */
+    license?: License;
+}
+
+/**
+ * The metadata operation to be performed on the alert.
+ */
+export interface Metadata {
+    /**
+     * The type of operation to be performed.
+     */
+    op?: MetadataOperation;
+    /**
+     * The metadata value
+     */
+    value?: RelationMetadata;
+}
+
+/**
+ * The change that has been made to the metadata.
+ */
+export interface MetadataChange {
+    /**
+     * The type of change on the metadata.
+     */
+    changeType?: MetadataChangeType;
+    /**
+     * Represents a metadata association to an alert.
+     */
+    value?: RelationMetadata;
+}
+
+/**
+ * The type of change that occurred to the metadata.
+ */
+export enum MetadataChangeType {
+    None = 0,
+    Created = 1,
+    Updated = 2,
+    Deleted = 3,
+}
+
+/**
+ * The operation to be performed on the metadata.
+ */
+export enum MetadataOperation {
+    /**
+     * Represents the defualt value if the operation is not specified or not supported.
+     */
+    None = 0,
+    /**
+     * Represents the addition of the metadata.
+     */
+    Add = 1,
+    /**
+     * Represents the removal of the metadata.
+     */
+    Remove = 2,
 }
 
 /**
@@ -453,6 +720,7 @@ export interface Pipeline {
     name?: string;
     phase?: string;
     phaseId?: string;
+    properties?: { [key: string] : any; };
 }
 
 export interface Region {
@@ -465,10 +733,6 @@ export interface Region {
      */
     columnStart?: number;
     /**
-     * A subset of the code snippet highlighting the issue
-     */
-    highlightSnippet?: string;
-    /**
      * The line number where the code snippet ends
      */
     lineEnd?: number;
@@ -476,10 +740,24 @@ export interface Region {
      * The line number where the code snippet starts
      */
     lineStart?: number;
+}
+
+/**
+ * The metadata to be associated with the alert.
+ */
+export interface RelationMetadata {
     /**
-     * The full code snippet
+     * Any additional attributes of the metadata.
      */
-    snippet?: string;
+    attributes?: { [key: string] : any; };
+    /**
+     * The type of the metadata.
+     */
+    rel?: string;
+    /**
+     * The URL of the metadata.
+     */
+    url?: string;
 }
 
 export interface Result {
@@ -598,6 +876,10 @@ export enum SarifJobStatus {
      * The job type when it fails
      */
     Failed = 3,
+    /**
+     * The job type when it is queued on exception
+     */
+    Requeued = 4,
 }
 
 export interface SarifUploadStatus {
@@ -607,16 +889,25 @@ export interface SarifUploadStatus {
 
 export interface SarifValidationError {
     nodePointer?: string;
+    ruleId?: string;
     validationError?: string;
 }
 
 export interface SearchCriteria {
     /**
+     * If provided, only return alerts with the ids specified. <br />Otherwise, return any alert.
+     */
+    alertIds?: number[];
+    /**
      * If provided, only return alerts of this type. Otherwise, return alerts of all types.
      */
     alertType?: AlertType;
     /**
-     * If provided, only alerts for this dependency are returned. <br />Otherwise, return alerts for all dependencies. <br />In a sarif submission, a dependency (or a vulnerable component) is specified in result.RelatedLocations[].logicalLocation.
+     * If provided, only return alerts at these confidence levels. <br />Both High and Other need to be specified to fetch alerts of all confidence levels. <br />Otherwise, return alerts with high confidence level. <br />Only applicable for secret alerts.
+     */
+    confidenceLevels?: Confidence[];
+    /**
+     * If provided, only alerts for this dependency are returned. <br />Otherwise, return alerts for all dependencies. <br />In a sarif submission, a dependency (or a component) is specified in result.RelatedLocations[].logicalLocation. <br />Not applicable for secret alerts.
      */
     dependencyName?: string;
     /**
@@ -628,27 +919,31 @@ export interface SearchCriteria {
      */
     keywords?: string;
     /**
+     * If provided, only alerts created for dependency with this license are returned. <br />Otherwise, return alerts for all licenses. <br />In a sarif submission, license for a dependency (or a component) is specified in result.RelatedLocations[].logicalLocation.properties.license. <br />Not applicable for secret alerts.
+     */
+    licenseName?: string;
+    /**
      * If provided, only return alerts that were modified since this date. <br />Otherwise return all alerts.
      */
     modifiedSince?: Date;
     /**
-     * If true, only return alerts found on the default branch of the repository. <br />If there have been no runs completed on the default branch, the last run is used instead regardless of the branch used for that run. <br />This option is ignored if ref is provided.
+     * If true or not set, only return alerts found on the default branch of the repository. <br />If there have been no runs completed on the default branch, the last run is used instead regardless of the branch used for that run. If false, return alerts from all branches. <br />This option is ignored if ref is provided. <br />Not applicable for secret alerts.
      */
-    onlyDefaultBranchAlerts?: boolean;
+    onlyDefaultBranch?: boolean;
     /**
-     * If provided with pipelineName, only return alerts detected in this pipeline phase <br />Otherwise, return alerts detected in all phases.
+     * If provided with pipelineName, only return alerts detected in this pipeline phase <br />Otherwise, return alerts detected in all phases. <br />Not applicable for secret alerts.
      */
     phaseId?: string;
     /**
-     * If provided with pipelineName, only return alerts detected in this pipeline phase <br />Otherwise, return alerts detected in all phases.
+     * If provided with pipelineName, only return alerts detected in this pipeline phase <br />Otherwise, return alerts detected in all phases. <br />Not applicable for secret alerts.
      */
     phaseName?: string;
     /**
-     * If provided, only return alerts detected in this pipeline. <br />Otherwise, return alerts detected in all pipelines.
+     * If provided, only return alerts detected in this pipeline. <br />Otherwise, return alerts detected in all pipelines. <br />Not applicable for secret alerts.
      */
     pipelineName?: string;
     /**
-     * If provided, only include alerts for this ref. <br />If not provided and OnlyDefaultBranch is true, only include alerts found on the default branch or last run branch if there is no analysis configuration for the default branch. <br />Otherwise, include alerts from all branches.
+     * If provided, only include alerts for this ref. <br />If not provided and OnlyDefaultBranch is true, only include alerts found on the default branch or last run branch if there is no analysis configuration for the default branch. <br />Otherwise, include alerts from all branches. <br />Not applicable for secret alerts.
      */
     ref?: string;
     /**
@@ -660,7 +955,7 @@ export interface SearchCriteria {
      */
     ruleName?: string;
     /**
-     * If provided, only return alerts at these severities. <br />Otherwise, return alerts at any serverity.
+     * If provided, only return alerts at these severities. <br />Otherwise, return alerts at any severity.
      */
     severities?: Severity[];
     /**
@@ -675,6 +970,10 @@ export interface SearchCriteria {
      * If provided with toolName, only return alerts detected by this tool. <br />Otherwise, return alerts detected by all tools.
      */
     toolName?: string;
+    /**
+     * If provided, only return alerts with the validity specified here. If the validity status is Unknown, fetch alerts of all validity results. <br />Only applicable for secret alerts. <br />Filtering by validity status may cause less alerts to be returned than requested with TOP parameter. <br />Due to this behavior, the ContinuationToken(<![CDATA[<header name>]]>) in the response header should be relied on to decide if another batch needs to be fetched.
+     */
+    validity?: AlertValidityStatus[];
 }
 
 export enum Severity {
@@ -685,6 +984,7 @@ export enum Severity {
     Note = 4,
     Warning = 5,
     Error = 6,
+    Undefined = 7,
 }
 
 export enum State {
@@ -726,31 +1026,95 @@ export interface Tool {
 
 export interface UxFilters {
     /**
-     * Branches to display alerts for.  If empty, show alerts from all branches
+     * Display alerts for specified branches. Show alerts for all branches if none are specified.
      */
     branches?: Branch[];
+    /**
+     * Display alerts for specified confidence levels. Show alerts for all confidence levels. if none are specified.
+     */
+    confidenceLevels?: Confidence[];
+    /**
+     * Display alerts for specified licenses. Show alerts for all licenses if none are specified.
+     */
+    licenses?: License[];
+    /**
+     * Display alerts for specified packages. Show alerts for all packages if none are specified.
+     */
     packages?: Dependency[];
     /**
-     * Pipelines to show alerts for.  If empty, show alerts for all pipelines
+     * Display alerts for specified pipelines. Show alerts for all pipelines if none are specified.
      */
     pipelines?: Pipeline[];
     progressPercentage?: number;
+    /**
+     * Display alerts for specified rules. Show alerts for all rules if none are specified.
+     */
     rules?: Rule[];
+    /**
+     * Display alerts for specified secret types. Show alerts for all secret types if none are specified.
+     */
     secretTypes?: string[];
     /**
-     * Alert severities to show.  If empty show all alert servities
+     * Display alerts for specified severities. Show alerts for all severities if none are specified.
      */
     severities?: Severity[];
     /**
-     * Alert states to show.  If empty show all alert states
+     * Display alerts for specified states. Show alerts for all states if none are specified.
      */
     states?: State[];
+    /**
+     * Display alerts for specified tools. Show alerts for all tools if none are specified.
+     */
     tools?: Tool[];
+    /**
+     * Display alerts for specified validity. Show alerts for all validities if none are specified.
+     */
+    validity?: AlertValidityStatus[];
 }
 
 export interface ValidationFingerprint {
+    /**
+     * The hash associated to the secret.
+     */
     validationFingerprintHash?: string;
+    /**
+     * The JSON representation of the secret.
+     */
     validationFingerprintJson?: string;
+    /**
+     * The date when the validity was last updated.
+     */
+    validityLastUpdatedDate?: Date;
+    /**
+     * The result of the validation.
+     */
+    validityResult?: ValidationResult;
+}
+
+/**
+ * Data associated to a validation request for an alert. Along with the request status, this includes the validity data that is part of Get Alert(s) response.
+ */
+export interface ValidationRequestInfo extends AlertValidityInfo {
+    alertValidationRequestStatus?: AlertValidationRequestStatus;
+}
+
+export enum ValidationResult {
+    /**
+     * Default value, no information about the secret can be inferred from this.
+     */
+    None = 0,
+    /**
+     * Represents a secret that can be used to connect to a resource.
+     */
+    Exploitable = 1,
+    /**
+     * Represents a secret that can't be used to connect to a resource.
+     */
+    NotExploitable = 2,
+    /**
+     * Represents a secret where no determination can be made about its exploitability.
+     */
+    Inconclusive = 3,
 }
 
 /**
@@ -797,14 +1161,6 @@ export interface VersionControlSnippet {
      */
     endLine?: number;
     /**
-     * subset of the code snippet highlighting the alert issue
-     */
-    highlightSnippet?: string;
-    /**
-     * larger code snippet
-     */
-    snippet?: string;
-    /**
      * column in the code file where the snippet starts
      */
     startColumn?: number;
@@ -812,10 +1168,6 @@ export interface VersionControlSnippet {
      * line in the code file where the snippet starts
      */
     startLine?: number;
-    /**
-     * Version control system where the code was found
-     */
-    versionControl?: string;
     /**
      * path of the code file in the version control system
      */
@@ -835,6 +1187,16 @@ export var TypeInfo = {
     },
     AlertAnalysisInstance: <any>{
     },
+    AlertListExpandOption: {
+        enumValues: {
+            "none": 0,
+            "minimal": 1
+        }
+    },
+    AlertMetadata: <any>{
+    },
+    AlertMetadataChange: <any>{
+    },
     AlertStateUpdate: <any>{
     },
     AlertType: {
@@ -842,7 +1204,27 @@ export var TypeInfo = {
             "unknown": 0,
             "dependency": 1,
             "secret": 2,
-            "code": 3
+            "code": 3,
+            "license": 4
+        }
+    },
+    AlertValidationRequestStatus: {
+        enumValues: {
+            "none": 0,
+            "created": 1,
+            "inProgress": 2,
+            "completed": 3,
+            "failed": 4
+        }
+    },
+    AlertValidityInfo: <any>{
+    },
+    AlertValidityStatus: {
+        enumValues: {
+            "none": 0,
+            "unknown": 1,
+            "active": 2,
+            "inactive": 3
         }
     },
     AnalysisConfiguration: <any>{
@@ -880,7 +1262,21 @@ export var TypeInfo = {
             "vcpkg": 16
         }
     },
+    Confidence: {
+        enumValues: {
+            "high": 0,
+            "other": 1
+        }
+    },
     Dependency: <any>{
+    },
+    DependencyKind: {
+        enumValues: {
+            "unknown": 0,
+            "rootDependency": 1,
+            "component": 2,
+            "vulnerableDependency": 3
+        }
     },
     DependencyResult: <any>{
     },
@@ -891,13 +1287,45 @@ export var TypeInfo = {
             "unknown": 0,
             "fixed": 1,
             "acceptedRisk": 2,
-            "falsePositive": 3
+            "falsePositive": 3,
+            "agreedToGuidance": 4,
+            "toolUpgrade": 5
         }
     },
     ExpandOption: {
         enumValues: {
             "none": 0,
             "validationFingerprint": 1
+        }
+    },
+    License: <any>{
+    },
+    LicenseState: {
+        enumValues: {
+            "unknown": 0,
+            "notHarvested": 1,
+            "harvested": 2
+        }
+    },
+    LogicalLocation: <any>{
+    },
+    Metadata: <any>{
+    },
+    MetadataChange: <any>{
+    },
+    MetadataChangeType: {
+        enumValues: {
+            "none": 0,
+            "created": 1,
+            "updated": 2,
+            "deleted": 3
+        }
+    },
+    MetadataOperation: {
+        enumValues: {
+            "none": 0,
+            "add": 1,
+            "remove": 2
         }
     },
     Result: <any>{
@@ -914,7 +1342,8 @@ export var TypeInfo = {
             "new": 0,
             "queued": 1,
             "completed": 2,
-            "failed": 3
+            "failed": 3,
+            "requeued": 4
         }
     },
     SarifUploadStatus: <any>{
@@ -929,7 +1358,8 @@ export var TypeInfo = {
             "critical": 3,
             "note": 4,
             "warning": 5,
-            "error": 6
+            "error": 6,
+            "undefined": 7
         }
     },
     State: {
@@ -943,11 +1373,26 @@ export var TypeInfo = {
     },
     UxFilters: <any>{
     },
+    ValidationFingerprint: <any>{
+    },
+    ValidationRequestInfo: <any>{
+    },
+    ValidationResult: {
+        enumValues: {
+            "none": 0,
+            "exploitable": 1,
+            "notExploitable": 2,
+            "inconclusive": 3
+        }
+    },
 };
 
 TypeInfo.Alert.fields = {
     alertType: {
         enumType: TypeInfo.AlertType
+    },
+    confidence: {
+        enumType: TypeInfo.Confidence
     },
     dismissal: {
         typeInfo: TypeInfo.Dismissal
@@ -964,11 +1409,22 @@ TypeInfo.Alert.fields = {
     lastSeenDate: {
         isDate: true,
     },
+    logicalLocations: {
+        isArray: true,
+        typeInfo: TypeInfo.LogicalLocation
+    },
     severity: {
         enumType: TypeInfo.Severity
     },
     state: {
         enumType: TypeInfo.State
+    },
+    validationFingerprints: {
+        isArray: true,
+        typeInfo: TypeInfo.ValidationFingerprint
+    },
+    validityDetails: {
+        typeInfo: TypeInfo.AlertValidityInfo
     }
 };
 
@@ -993,6 +1449,19 @@ TypeInfo.AlertAnalysisInstance.fields = {
     }
 };
 
+TypeInfo.AlertMetadata.fields = {
+    metadata: {
+        isArray: true,
+        typeInfo: TypeInfo.Metadata
+    }
+};
+
+TypeInfo.AlertMetadataChange.fields = {
+    metadataChange: {
+        typeInfo: TypeInfo.MetadataChange
+    }
+};
+
 TypeInfo.AlertStateUpdate.fields = {
     dismissedReason: {
         enumType: TypeInfo.DismissalType
@@ -1002,7 +1471,19 @@ TypeInfo.AlertStateUpdate.fields = {
     }
 };
 
+TypeInfo.AlertValidityInfo.fields = {
+    validityLastCheckedDate: {
+        isDate: true,
+    },
+    validityStatus: {
+        enumType: TypeInfo.AlertValidityStatus
+    }
+};
+
 TypeInfo.AnalysisConfiguration.fields = {
+    alertType: {
+        enumType: TypeInfo.AlertType
+    },
     analysisConfigurationType: {
         enumType: TypeInfo.AnalysisConfigurationType
     }
@@ -1039,6 +1520,9 @@ TypeInfo.Branch.fields = {
 TypeInfo.Dependency.fields = {
     componentType: {
         enumType: TypeInfo.ComponentType
+    },
+    license: {
+        typeInfo: TypeInfo.License
     }
 };
 
@@ -1054,6 +1538,33 @@ TypeInfo.Dismissal.fields = {
     },
     requestedOn: {
         isDate: true,
+    }
+};
+
+TypeInfo.License.fields = {
+    state: {
+        enumType: TypeInfo.LicenseState
+    }
+};
+
+TypeInfo.LogicalLocation.fields = {
+    kind: {
+        enumType: TypeInfo.DependencyKind
+    },
+    license: {
+        typeInfo: TypeInfo.License
+    }
+};
+
+TypeInfo.Metadata.fields = {
+    op: {
+        enumType: TypeInfo.MetadataOperation
+    }
+};
+
+TypeInfo.MetadataChange.fields = {
+    changeType: {
+        enumType: TypeInfo.MetadataChangeType
     }
 };
 
@@ -1079,6 +1590,10 @@ TypeInfo.SearchCriteria.fields = {
     alertType: {
         enumType: TypeInfo.AlertType
     },
+    confidenceLevels: {
+        isArray: true,
+        enumType: TypeInfo.Confidence
+    },
     fromDate: {
         isDate: true,
     },
@@ -1095,6 +1610,10 @@ TypeInfo.SearchCriteria.fields = {
     },
     toDate: {
         isDate: true,
+    },
+    validity: {
+        isArray: true,
+        enumType: TypeInfo.AlertValidityStatus
     }
 };
 
@@ -1102,6 +1621,14 @@ TypeInfo.UxFilters.fields = {
     branches: {
         isArray: true,
         typeInfo: TypeInfo.Branch
+    },
+    confidenceLevels: {
+        isArray: true,
+        enumType: TypeInfo.Confidence
+    },
+    licenses: {
+        isArray: true,
+        typeInfo: TypeInfo.License
     },
     packages: {
         isArray: true,
@@ -1114,5 +1641,30 @@ TypeInfo.UxFilters.fields = {
     states: {
         isArray: true,
         enumType: TypeInfo.State
+    },
+    validity: {
+        isArray: true,
+        enumType: TypeInfo.AlertValidityStatus
+    }
+};
+
+TypeInfo.ValidationFingerprint.fields = {
+    validityLastUpdatedDate: {
+        isDate: true,
+    },
+    validityResult: {
+        enumType: TypeInfo.ValidationResult
+    }
+};
+
+TypeInfo.ValidationRequestInfo.fields = {
+    alertValidationRequestStatus: {
+        enumType: TypeInfo.AlertValidationRequestStatus
+    },
+    validityLastCheckedDate: {
+        isDate: true,
+    },
+    validityStatus: {
+        enumType: TypeInfo.AlertValidityStatus
     }
 };
