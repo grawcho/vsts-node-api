@@ -34,14 +34,31 @@ extends:
           inputs:
             versionSpec: $(versionSpec)
           displayName: Install node
+
+        # CFS [SFI-ES4.2.4]: authenticate the internal Azure Artifacts feed declared
+        # in .npmrc, then force every npm invocation to resolve through it. Without
+        # this, npm falls back to the forbidden public registry.
+        - task: NpmAuthenticate@0
+          displayName: Authenticate internal npm feed
+          inputs:
+            workingFile: .npmrc
+
         - script: npm install -g npm@$(npmVersion)
           displayName: Upgrade npm
+          env:
+            NPM_CONFIG_USERCONFIG: $(Build.SourcesDirectory)/.npmrc
         - script: npm install
           displayName: npm install
+          env:
+            NPM_CONFIG_USERCONFIG: $(Build.SourcesDirectory)/.npmrc
         - script: npm run build
           displayName: npm run build
+          env:
+            NPM_CONFIG_USERCONFIG: $(Build.SourcesDirectory)/.npmrc
         - script: npm run units
           displayName: Run unit tests
+          env:
+            NPM_CONFIG_USERCONFIG: $(Build.SourcesDirectory)/.npmrc
         - task: Npm@1
           displayName: Publish azure-devops-node-api to kusto npm
           condition: and(succeeded(), in(variables['build.reason'], 'IndividualCI', 'BatchedCI', 'Manual'), eq(variables['build.sourcebranchname'], 'master'))
